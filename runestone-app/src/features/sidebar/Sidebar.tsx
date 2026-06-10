@@ -20,16 +20,29 @@ import { PanelRightOpen, PanelRightClose } from 'lucide-react'
 export function Sidebar() {
   const {
     selectedVaultId,
-    scanVault, createNode, isLoading, error,
-    nodeError, nodeLoading,
-    graphError, graphLoading,
-    searchError, searchLoading,
+    scanVault,
+    createNode,
+    isLoading,
+    error,
+    nodeError,
+    nodeLoading,
+    graphError,
+    graphLoading,
+    searchError,
+    searchLoading,
     clipperError,
-    toggleSearch, showSearch, selectNode,
-    toggleExtractions, showExtractions, pendingExtractions,
-    toggleChat, showChat,
-    sidebarCollapsed, toggleSidebar,
-    listViewMode, setListViewMode,
+    toggleSearch,
+    showSearch,
+    selectNode,
+    toggleExtractions,
+    showExtractions,
+    pendingExtractions,
+    toggleChat,
+    showChat,
+    sidebarCollapsed,
+    toggleSidebar,
+    listViewMode,
+    setListViewMode,
     registeredPanels,
   } = useStore(
     useShallow((s) => ({
@@ -91,9 +104,11 @@ export function Sidebar() {
       {/* Sidebar panel */}
       <div
         className={`h-full bg-card flex flex-col border-r border-border transition-all duration-200 overflow-hidden
-          ${sidebarCollapsed
-            ? `fixed left-0 top-0 bottom-0 z-50 shadow-2xl ${hoverOpen ? 'w-72 opacity-100' : 'w-72 opacity-0 pointer-events-none -translate-x-2'}`
-            : 'w-72 relative'}`}
+          ${
+            sidebarCollapsed
+              ? `fixed left-0 top-0 bottom-0 z-50 shadow-2xl ${hoverOpen ? 'w-72 opacity-100' : 'w-72 opacity-0 pointer-events-none -translate-x-2'}`
+              : 'w-72 relative'
+          }`}
         onMouseLeave={handleMouseLeave}
       >
         {/* Header row */}
@@ -137,24 +152,70 @@ export function Sidebar() {
                 </button>
               </div>
               <div className="flex gap-0.5 flex-wrap">
-                <Button variant="ghost" size="icon" className={`h-6 w-6 ${showSearch ? 'bg-accent' : ''}`} onClick={toggleSearch} title="Search (Ctrl+K)" aria-label="Search">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-6 w-6 ${showSearch ? 'bg-accent' : ''}`}
+                  onClick={toggleSearch}
+                  title="Search (Ctrl+K)"
+                  aria-label="Search"
+                >
                   <span className="text-[10px]">Q</span>
                 </Button>
-                <Button variant="ghost" size="icon" className={`h-6 w-6 ${showChat ? 'bg-accent' : ''}`} onClick={toggleChat} title="Chat (Ctrl+L)" aria-label="Chat">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-6 w-6 ${showChat ? 'bg-accent' : ''}`}
+                  onClick={toggleChat}
+                  title="Chat (Ctrl+L)"
+                  aria-label="Chat"
+                >
                   <span className="text-[10px]">C</span>
                 </Button>
-                <Button variant="ghost" size="icon" className={`h-6 w-6 ${showExtractions ? 'bg-accent' : ''}`} onClick={toggleExtractions} title="Extractions" aria-label="Extractions">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-6 w-6 ${showExtractions ? 'bg-accent' : ''}`}
+                  onClick={toggleExtractions}
+                  title="Extractions"
+                  aria-label="Extractions"
+                >
                   <span className="text-[10px] relative">
-                    E{pendingExtractions.length > 0 && <span className="absolute -top-0.5 -right-1 text-[7px] text-amber-400">{pendingExtractions.length}</span>}
+                    E
+                    {pendingExtractions.length > 0 && (
+                      <span className="absolute -top-0.5 -right-1 text-[7px] text-amber-400">
+                        {pendingExtractions.length}
+                      </span>
+                    )}
                   </span>
                 </Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={scanVault} title="Scan vault" aria-label="Scan vault">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={scanVault}
+                  title="Scan vault"
+                  aria-label="Scan vault"
+                >
                   <span className="text-[10px]">S</span>
                 </Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowObsidianImport(!showObsidianImport)} title="Import Obsidian vault" aria-label="Import Obsidian vault">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => setShowObsidianImport(!showObsidianImport)}
+                  title="Import Obsidian vault"
+                  aria-label="Import Obsidian vault"
+                >
                   <span className="text-[10px]">O</span>
                 </Button>
-                <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowNewNode(!showNewNode)} aria-label="Create note">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={() => setShowNewNode(!showNewNode)}
+                  aria-label="Create note"
+                >
                   <span className="text-sm leading-none">+</span>
                 </Button>
                 <Button
@@ -198,7 +259,10 @@ export function Sidebar() {
               </div>
             </div>
 
-            <ObsidianImport show={showObsidianImport} onClose={() => setShowObsidianImport(false)} />
+            <ObsidianImport
+              show={showObsidianImport}
+              onClose={() => setShowObsidianImport(false)}
+            />
 
             <FilterBar />
 
@@ -240,11 +304,15 @@ export function Sidebar() {
             <PluginPanel />
 
             {registeredPanels?.map((panel) => (
-              <div key={panel.id} className="border-t p-2" ref={(el) => {
-                if (el && !el.hasChildNodes()) {
-                  panel.render(el)
-                }
-              }} />
+              <div
+                key={panel.id}
+                className="border-t p-2"
+                ref={(el) => {
+                  if (el && !el.hasChildNodes()) {
+                    panel.render(el)
+                  }
+                }}
+              />
             ))}
           </div>
         )}
@@ -256,9 +324,7 @@ export function Sidebar() {
         )}
 
         {displayLoading && (
-          <div className="p-2 border-t text-xs text-muted-foreground shrink-0">
-            Loading...
-          </div>
+          <div className="p-2 border-t text-xs text-muted-foreground shrink-0">Loading...</div>
         )}
       </div>
     </>

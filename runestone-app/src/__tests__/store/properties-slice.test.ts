@@ -39,7 +39,10 @@ describe('properties-slice', () => {
 
   describe('loadNodeProperties', () => {
     it('loads properties for a node', async () => {
-      const props = { node_id: 'n-1', properties: [{ key: 'color', value: 'blue', prop_type: 'text' }] }
+      const props = {
+        node_id: 'n-1',
+        properties: [{ key: 'color', value: 'blue', prop_type: 'text' }],
+      }
       mockApi.getNodeProperties.mockResolvedValue(props)
 
       await useStore.getState().loadNodeProperties('n-1')
@@ -73,7 +76,9 @@ describe('properties-slice', () => {
         key: 'status',
         value: 'done',
       })
-      expect(useStore.getState().nodeProperties).toEqual([{ key: 'status', value: 'done', prop_type: 'text' }])
+      expect(useStore.getState().nodeProperties).toEqual([
+        { key: 'status', value: 'done', prop_type: 'text' },
+      ])
     })
   })
 

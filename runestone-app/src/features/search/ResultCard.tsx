@@ -11,9 +11,7 @@ function ResultCard({ result, onClick }: { result: SearchResult; onClick: (id: s
         <span className="text-[10px] px-1 py-0.5 rounded bg-muted text-muted-foreground">
           {result.content_type}
         </span>
-        <span className="text-[10px] text-muted-foreground ml-auto">
-          {result.score.toFixed(3)}
-        </span>
+        <span className="text-[10px] text-muted-foreground ml-auto">{result.score.toFixed(3)}</span>
       </div>
       <p className="text-xs text-muted-foreground line-clamp-2">{result.snippet}</p>
     </button>

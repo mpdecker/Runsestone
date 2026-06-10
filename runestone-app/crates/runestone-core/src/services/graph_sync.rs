@@ -52,11 +52,7 @@ pub async fn delete_node(graph: &Arc<neo4rs::Graph>, pg_id: Uuid) -> AppResult<(
     Ok(())
 }
 
-pub async fn add_tag(
-    graph: &Arc<neo4rs::Graph>,
-    pg_id: Uuid,
-    tag_name: &str,
-) -> AppResult<()> {
+pub async fn add_tag(graph: &Arc<neo4rs::Graph>, pg_id: Uuid, tag_name: &str) -> AppResult<()> {
     graph
         .run(
             neo4rs::query(
@@ -69,11 +65,7 @@ pub async fn add_tag(
     Ok(())
 }
 
-pub async fn remove_tag(
-    graph: &Arc<neo4rs::Graph>,
-    pg_id: Uuid,
-    tag_name: &str,
-) -> AppResult<()> {
+pub async fn remove_tag(graph: &Arc<neo4rs::Graph>, pg_id: Uuid, tag_name: &str) -> AppResult<()> {
     graph
         .run(
             neo4rs::query(
@@ -188,10 +180,7 @@ pub async fn create_extraction_edge(
 }
 
 /// Delete Neo4j node first; on failure, caller should not delete from PostgreSQL.
-pub async fn delete_node_before_pg(
-    graph: &Arc<neo4rs::Graph>,
-    pg_id: Uuid,
-) -> AppResult<()> {
+pub async fn delete_node_before_pg(graph: &Arc<neo4rs::Graph>, pg_id: Uuid) -> AppResult<()> {
     delete_node(graph, pg_id).await
 }
 

@@ -6,14 +6,27 @@ import { Button } from '@/components/ui/button'
 
 export function NodeActions() {
   const {
-    selectedNodeId, currentNode,
-    showBacklinks, toggleBacklinks, parseWikiLinks,
-    showOutgoingLinks, toggleOutgoingLinks, outgoingLinks,
-    summarizeNode, nodeSummary, summaryLoading,
-    suggestedLinks, loadSuggestedLinks,
-    suggestTags, tagSuggestions,
-    backlinks, selectNode,
-    nodeTags, addTags, removeTag, acceptSuggestedTags,
+    selectedNodeId,
+    currentNode,
+    showBacklinks,
+    toggleBacklinks,
+    parseWikiLinks,
+    showOutgoingLinks,
+    toggleOutgoingLinks,
+    outgoingLinks,
+    summarizeNode,
+    nodeSummary,
+    summaryLoading,
+    suggestedLinks,
+    loadSuggestedLinks,
+    suggestTags,
+    tagSuggestions,
+    backlinks,
+    selectNode,
+    nodeTags,
+    addTags,
+    removeTag,
+    acceptSuggestedTags,
   } = useStore(
     useShallow((s) => ({
       selectedNodeId: s.selectedNodeId,
@@ -46,7 +59,10 @@ export function NodeActions() {
 
   const handleAddTag = async (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && tagInput.trim()) {
-      const tags = tagInput.split(',').map(t => t.trim()).filter(Boolean)
+      const tags = tagInput
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean)
       await addTags(selectedNodeId, tags)
       setTagInput('')
     }
@@ -55,20 +71,10 @@ export function NodeActions() {
   return (
     <div className="border-t p-2 space-y-1">
       <div className="flex gap-1 flex-wrap">
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs h-7"
-          onClick={toggleBacklinks}
-        >
+        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={toggleBacklinks}>
           {showBacklinks ? 'Hide' : 'Show'} Backlinks
         </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="text-xs h-7"
-          onClick={toggleOutgoingLinks}
-        >
+        <Button variant="ghost" size="sm" className="text-xs h-7" onClick={toggleOutgoingLinks}>
           {showOutgoingLinks ? 'Hide' : 'Show'} Outgoing
         </Button>
         {currentNode && (
@@ -115,15 +121,15 @@ export function NodeActions() {
       </div>
 
       {nodeSummary && (
-        <div className="p-2 bg-muted/50 rounded text-xs text-muted-foreground">
-          {nodeSummary}
-        </div>
+        <div className="p-2 bg-muted/50 rounded text-xs text-muted-foreground">{nodeSummary}</div>
       )}
 
       {tagSuggestions.length > 0 && (
         <div className="space-y-0.5">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Suggested Tags</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+              Suggested Tags
+            </p>
             <Button
               variant="ghost"
               size="sm"
@@ -187,7 +193,9 @@ export function NodeActions() {
 
       {suggestedLinks.length > 0 && (
         <div className="space-y-0.5">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Suggested Links</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+            Suggested Links
+          </p>
           {suggestedLinks.map((s) => (
             <button
               key={s.node_id}
@@ -195,7 +203,9 @@ export function NodeActions() {
               onClick={() => selectNode(s.node_id)}
             >
               <span className="truncate">{s.title}</span>
-              <span className="text-[10px] text-muted-foreground shrink-0 ml-1">{Math.round(s.score * 100)}%</span>
+              <span className="text-[10px] text-muted-foreground shrink-0 ml-1">
+                {Math.round(s.score * 100)}%
+              </span>
             </button>
           ))}
         </div>
@@ -224,12 +234,16 @@ export function NodeActions() {
 
       {showOutgoingLinks && outgoingLinks.length > 0 && (
         <div className="space-y-0.5 max-h-32 overflow-y-auto">
-          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Outgoing Links</p>
+          <p className="text-[10px] text-muted-foreground uppercase tracking-wider">
+            Outgoing Links
+          </p>
           {outgoingLinks.map((b: Backlink) => (
             <button
               key={b.node_id}
               className="w-full text-left px-2 py-0.5 text-xs rounded hover:bg-muted"
-              onClick={() => b.node_id !== '00000000-0000-0000-0000-000000000000' && selectNode(b.node_id)}
+              onClick={() =>
+                b.node_id !== '00000000-0000-0000-0000-000000000000' && selectNode(b.node_id)
+              }
             >
               <div className="truncate">{b.title}</div>
               {b.context && (

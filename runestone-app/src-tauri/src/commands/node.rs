@@ -1,8 +1,10 @@
-use crate::router::dispatch;
-use crate::models::node::{CreateNodeRequest, Node, NodeListItem, ScanVaultResult, UpdateNodeRequest};
+use crate::models::node::{
+    CreateNodeRequest, Node, NodeListItem, ScanVaultResult, UpdateNodeRequest,
+};
 use crate::models::vault::Vault;
 use crate::path_guard::canonicalize_path;
 use crate::repositories::node_repo;
+use crate::router::dispatch;
 use crate::services::vault_sync::{self, UpsertAction};
 use crate::state::AppState;
 use std::collections::HashSet;
@@ -144,13 +146,12 @@ pub async fn scan_vault_impl(
 
         for node in db_nodes {
             if let Some(ref path) = node.file_path {
-                if !seen_paths.contains(path) {
-                    if vault_sync::delete_by_path(&pool, &graph, vault_id, path)
+                if !seen_paths.contains(path)
+                    && vault_sync::delete_by_path(&pool, &graph, vault_id, path)
                         .await
                         .map_err(|e| e.to_string())?
-                    {
-                        result.deleted += 1;
-                    }
+                {
+                    result.deleted += 1;
                 }
             }
         }

@@ -1,7 +1,7 @@
-use runestone_server::{build_router, ServerState, MAX_INVOKE_BODY_BYTES};
 use runestone_core::db::{create_neo4j_graph, create_pg_pool, run_neo4j_init, run_pg_migrations};
 use runestone_core::handlers::embeddings;
 use runestone_core::{BackendContext, EmbeddingConfig, LlmConfig};
+use runestone_server::{build_router, ServerState, MAX_INVOKE_BODY_BYTES};
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tracing::info;
@@ -19,8 +19,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let database_url = std::env::var("DATABASE_URL")
         .unwrap_or_else(|_| "postgres://runestone:runestone@postgres:5432/runestone".to_string());
-    let neo4j_uri =
-        std::env::var("NEO4J_URL").unwrap_or_else(|_| "bolt://neo4j:7687".to_string());
+    let neo4j_uri = std::env::var("NEO4J_URL").unwrap_or_else(|_| "bolt://neo4j:7687".to_string());
     let neo4j_user = std::env::var("NEO4J_USER").unwrap_or_else(|_| "neo4j".to_string());
     let neo4j_password =
         std::env::var("NEO4J_PASSWORD").unwrap_or_else(|_| "runestone".to_string());

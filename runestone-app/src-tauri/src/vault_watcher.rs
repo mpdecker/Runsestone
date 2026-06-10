@@ -11,11 +11,7 @@ use uuid::Uuid;
 static WATCHER: Mutex<Option<notify_debouncer_mini::Debouncer<notify::RecommendedWatcher>>> =
     Mutex::new(None);
 
-pub fn start_vault_watcher(
-    app: AppHandle,
-    state: &AppState,
-    vault_id: Uuid,
-) -> Result<(), String> {
+pub fn start_vault_watcher(app: AppHandle, state: &AppState, vault_id: Uuid) -> Result<(), String> {
     stop_vault_watcher()?;
 
     let vault = tauri::async_runtime::block_on(async {

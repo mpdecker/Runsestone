@@ -10,7 +10,11 @@ pub async fn create_pg_pool(database_url: &str) -> Result<PgPool, sqlx::Error> {
         .await
 }
 
-pub async fn create_neo4j_graph(uri: &str, user: &str, password: &str) -> Result<Arc<Graph>, neo4rs::Error> {
+pub async fn create_neo4j_graph(
+    uri: &str,
+    user: &str,
+    password: &str,
+) -> Result<Arc<Graph>, neo4rs::Error> {
     let graph = Graph::new(uri, user, password).await?;
     Ok(Arc::new(graph))
 }

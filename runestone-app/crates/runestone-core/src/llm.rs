@@ -24,9 +24,11 @@ impl Default for LlmConfig {
         Self {
             provider: std::env::var("LLM_PROVIDER").unwrap_or_else(|_| "ollama".to_string()),
             model: std::env::var("LLM_MODEL").unwrap_or_else(|_| "llama3.2".to_string()),
-            ollama_base_url: std::env::var("OLLAMA_BASE_URL").unwrap_or_else(|_| "http://localhost:11434".to_string()),
+            ollama_base_url: std::env::var("OLLAMA_BASE_URL")
+                .unwrap_or_else(|_| "http://localhost:11434".to_string()),
             openai_api_key: std::env::var("OPENAI_API_KEY").unwrap_or_default(),
-            openai_base_url: std::env::var("OPENAI_BASE_URL").unwrap_or_else(|_| "https://api.openai.com/v1".to_string()),
+            openai_base_url: std::env::var("OPENAI_BASE_URL")
+                .unwrap_or_else(|_| "https://api.openai.com/v1".to_string()),
         }
     }
 }
@@ -171,12 +173,26 @@ async fn ollama_extract(prompt: &str, config: &LlmConfig) -> Result<ExtractionRe
         .await
         .map_err(|e| format!("Ollama request failed: {}", e))?;
 
-    let body = response.text().await.map_err(|e| format!("Read body: {}", e))?;
-    let result: OllamaChatResponse = serde_json::from_str(&body)
-        .map_err(|e| format!("Parse Ollama response: {} - body: {}", e, &body[..200.min(body.len())]))?;
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("Read body: {}", e))?;
+    let result: OllamaChatResponse = serde_json::from_str(&body).map_err(|e| {
+        format!(
+            "Parse Ollama response: {} - body: {}",
+            e,
+            &body[..200.min(body.len())]
+        )
+    })?;
 
-    let extraction: ExtractionResult = serde_json::from_str(&result.message.content)
-        .map_err(|e| format!("Parse extraction JSON: {} - content: {}", e, &result.message.content[..200.min(result.message.content.len())]))?;
+    let extraction: ExtractionResult =
+        serde_json::from_str(&result.message.content).map_err(|e| {
+            format!(
+                "Parse extraction JSON: {} - content: {}",
+                e,
+                &result.message.content[..200.min(result.message.content.len())]
+            )
+        })?;
 
     Ok(extraction)
 }
@@ -204,16 +220,32 @@ async fn openai_extract(prompt: &str, config: &LlmConfig) -> Result<ExtractionRe
         .await
         .map_err(|e| format!("OpenAI request failed: {}", e))?;
 
-    let body = response.text().await.map_err(|e| format!("Read body: {}", e))?;
-    let result: OpenAiChatResponse = serde_json::from_str(&body)
-        .map_err(|e| format!("Parse OpenAI response: {} - body: {}", e, &body[..200.min(body.len())]))?;
+    let body = response
+        .text()
+        .await
+        .map_err(|e| format!("Read body: {}", e))?;
+    let result: OpenAiChatResponse = serde_json::from_str(&body).map_err(|e| {
+        format!(
+            "Parse OpenAI response: {} - body: {}",
+            e,
+            &body[..200.min(body.len())]
+        )
+    })?;
 
-    let content = &result.choices.first()
+    let content = &result
+        .choices
+        .first()
         .ok_or("No choices in OpenAI response")?
-        .message.content;
+        .message
+        .content;
 
-    let extraction: ExtractionResult = serde_json::from_str(content)
-        .map_err(|e| format!("Parse extraction JSON: {} - content: {}", e, &content[..200.min(content.len())]))?;
+    let extraction: ExtractionResult = serde_json::from_str(content).map_err(|e| {
+        format!(
+            "Parse extraction JSON: {} - content: {}",
+            e,
+            &content[..200.min(content.len())]
+        )
+    })?;
 
     Ok(extraction)
 }

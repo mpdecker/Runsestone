@@ -219,8 +219,10 @@ pub async fn get_backlinks(ctx: &BackendContext, node_id: Uuid) -> Result<Vec<Ba
     let mut stream = ctx
         .neo4j
         .execute(
-            neo4rs::query("MATCH (n:Node)-[:LINKS_TO]->(target:Node {pg_id: $pg_id}) RETURN n.pg_id")
-                .param("pg_id", pg_id),
+            neo4rs::query(
+                "MATCH (n:Node)-[:LINKS_TO]->(target:Node {pg_id: $pg_id}) RETURN n.pg_id",
+            )
+            .param("pg_id", pg_id),
         )
         .await
         .map_err(|e| format!("Neo4j query failed: {}", e))?;

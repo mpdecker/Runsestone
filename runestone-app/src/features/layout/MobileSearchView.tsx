@@ -65,9 +65,7 @@ export function MobileSearchView() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {error && (
-          <div className="p-4 text-sm text-destructive">{error}</div>
-        )}
+        {error && <div className="p-4 text-sm text-destructive">{error}</div>}
         {!selectedVaultId && (
           <div className="p-4 text-sm text-muted-foreground">Select a vault to search.</div>
         )}

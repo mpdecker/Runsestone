@@ -12,9 +12,7 @@ export function MobileNotesList() {
     loadVaults()
   }, [loadVaults])
 
-  const filtered = nodes.filter((n) =>
-    n.title.toLowerCase().includes(search.toLowerCase())
-  )
+  const filtered = nodes.filter((n) => n.title.toLowerCase().includes(search.toLowerCase()))
 
   if (showEditor && selectedNodeId) {
     return (

@@ -122,7 +122,18 @@ describe('DesktopApp', () => {
       selectedNodeId: 'n-1',
       splitMode: 'off',
       secondaryTabId: 'n-2',
-      secondaryNode: { id: 'n-2', vault_id: 'v-1', title: 'Secondary', content: '', content_type: 'note', file_path: null, metadata: null, word_count: 0, created_at: null, updated_at: null },
+      secondaryNode: {
+        id: 'n-2',
+        vault_id: 'v-1',
+        title: 'Secondary',
+        content: '',
+        content_type: 'note',
+        file_path: null,
+        metadata: null,
+        word_count: 0,
+        created_at: null,
+        updated_at: null,
+      },
     })
     render(<DesktopApp />)
     expect(screen.queryByTestId('note-editor-secondary')).not.toBeInTheDocument()
@@ -144,7 +155,18 @@ describe('DesktopApp', () => {
       selectedNodeId: 'n-1',
       splitMode: 'vertical',
       secondaryTabId: 'n-2',
-      secondaryNode: { id: 'n-2', vault_id: 'v-1', title: 'Secondary', content: '', content_type: 'note', file_path: null, metadata: null, word_count: 0, created_at: null, updated_at: null },
+      secondaryNode: {
+        id: 'n-2',
+        vault_id: 'v-1',
+        title: 'Secondary',
+        content: '',
+        content_type: 'note',
+        file_path: null,
+        metadata: null,
+        word_count: 0,
+        created_at: null,
+        updated_at: null,
+      },
     })
     render(<DesktopApp />)
     expect(screen.getByTestId('note-editor-secondary')).toBeInTheDocument()
@@ -175,7 +197,11 @@ describe('DesktopApp', () => {
 
     it('Ctrl+K calls toggleSearch', () => {
       let toggled = false
-      useStore.setState({ toggleSearch: () => { toggled = true } } as any)
+      useStore.setState({
+        toggleSearch: () => {
+          toggled = true
+        },
+      } as any)
 
       render(<DesktopApp />)
       fireEvent.keyDown(window, { key: 'k', ctrlKey: true })
@@ -185,7 +211,11 @@ describe('DesktopApp', () => {
 
     it('Ctrl+P calls toggleCommandPalette', () => {
       let toggled = false
-      useStore.setState({ toggleCommandPalette: () => { toggled = true } } as any)
+      useStore.setState({
+        toggleCommandPalette: () => {
+          toggled = true
+        },
+      } as any)
 
       render(<DesktopApp />)
       fireEvent.keyDown(window, { key: 'p', ctrlKey: true })
@@ -195,7 +225,11 @@ describe('DesktopApp', () => {
 
     it('Ctrl+L calls toggleChat', () => {
       let toggled = false
-      useStore.setState({ toggleChat: () => { toggled = true } } as any)
+      useStore.setState({
+        toggleChat: () => {
+          toggled = true
+        },
+      } as any)
 
       render(<DesktopApp />)
       fireEvent.keyDown(window, { key: 'l', ctrlKey: true })
@@ -205,7 +239,11 @@ describe('DesktopApp', () => {
 
     it('Ctrl+Shift+E calls toggleExtractions', () => {
       let toggled = false
-      useStore.setState({ toggleExtractions: () => { toggled = true } } as any)
+      useStore.setState({
+        toggleExtractions: () => {
+          toggled = true
+        },
+      } as any)
 
       render(<DesktopApp />)
       fireEvent.keyDown(window, { key: 'E', ctrlKey: true, shiftKey: true })
@@ -215,7 +253,11 @@ describe('DesktopApp', () => {
 
     it('Ctrl+Shift+B calls toggleSidebar', () => {
       let toggled = false
-      useStore.setState({ toggleSidebar: () => { toggled = true } } as any)
+      useStore.setState({
+        toggleSidebar: () => {
+          toggled = true
+        },
+      } as any)
 
       render(<DesktopApp />)
       fireEvent.keyDown(window, { key: 'B', ctrlKey: true, shiftKey: true })
@@ -225,7 +267,11 @@ describe('DesktopApp', () => {
 
     it('Ctrl+O calls toggleCommandPalette', () => {
       let toggled = false
-      useStore.setState({ toggleCommandPalette: () => { toggled = true } } as any)
+      useStore.setState({
+        toggleCommandPalette: () => {
+          toggled = true
+        },
+      } as any)
 
       render(<DesktopApp />)
       fireEvent.keyDown(window, { key: 'o', ctrlKey: true })

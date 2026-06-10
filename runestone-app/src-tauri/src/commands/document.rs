@@ -1,9 +1,9 @@
-use crate::router::dispatch;
 use crate::document::{chunk_text, parse_document};
 use crate::embedding::generate_embedding;
 use crate::models::extraction::ExtractionNode;
 use crate::models::node::Node;
 use crate::path_guard::canonicalize_path;
+use crate::router::dispatch;
 use crate::services::graph_sync;
 use crate::state::AppState;
 use uuid::Uuid;

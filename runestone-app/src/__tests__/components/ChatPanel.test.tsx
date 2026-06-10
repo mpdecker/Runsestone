@@ -111,9 +111,7 @@ describe('ChatPanel', () => {
   it('renders citations', () => {
     useStore.setState({
       showChat: true,
-      chatCitations: [
-        { node_id: 'n-1', title: 'Source 1', snippet: 'This is a source snippet' },
-      ],
+      chatCitations: [{ node_id: 'n-1', title: 'Source 1', snippet: 'This is a source snippet' }],
     })
     render(<ChatPanel />)
     expect(screen.getByText('Sources')).toBeInTheDocument()

@@ -38,7 +38,9 @@ fn parse_pdf(file_path: &str) -> Result<String, String> {
     }
 
     if text.trim().is_empty() {
-        return Err("PDF appears to contain no extractable text (may be scanned/image-based)".to_string());
+        return Err(
+            "PDF appears to contain no extractable text (may be scanned/image-based)".to_string(),
+        );
     }
 
     Ok(text)
@@ -78,7 +80,10 @@ mod tests {
     fn test_chunk_text_no_overlap() {
         let text = "This is a test document with multiple words that should be split into chunks.";
         let chunks = chunk_text(text, 5, 0);
-        assert!(chunks.len() > 1, "Should produce multiple chunks with small max size");
+        assert!(
+            chunks.len() > 1,
+            "Should produce multiple chunks with small max size"
+        );
         for chunk in &chunks {
             assert!(!chunk.is_empty(), "Chunks should not be empty");
         }

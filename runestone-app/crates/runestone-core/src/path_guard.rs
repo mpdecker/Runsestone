@@ -4,7 +4,10 @@ use std::path::{Component, Path, PathBuf};
 /// Canonicalize an absolute path string (rejects `..` components in relative paths).
 pub fn canonicalize_path(path: &str) -> AppResult<PathBuf> {
     let target = Path::new(path);
-    if target.components().any(|c| matches!(c, Component::ParentDir)) {
+    if target
+        .components()
+        .any(|c| matches!(c, Component::ParentDir))
+    {
         return Err(AppError::Validation(
             "Path must not contain parent directory references".to_string(),
         ));
@@ -33,9 +36,7 @@ pub fn ensure_within_root(root: &str, path: &str) -> AppResult<PathBuf> {
     for component in resolved.components() {
         match component {
             Component::ParentDir => {
-                return Err(AppError::Validation(
-                    "Path escapes vault root".to_string(),
-                ));
+                return Err(AppError::Validation("Path escapes vault root".to_string()));
             }
             Component::CurDir => {}
             other => normalized.push(other.as_os_str()),

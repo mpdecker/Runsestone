@@ -125,8 +125,20 @@ describe('SearchPanel', () => {
         vector_results: [],
         fts_results: [],
         combined: [
-          { node_id: 'n-1', title: 'Note 1', content_type: 'note', snippet: 'Snippet 1', score: 0.95 },
-          { node_id: 'n-2', title: 'Note 2', content_type: 'concept', snippet: 'Snippet 2', score: 0.80 },
+          {
+            node_id: 'n-1',
+            title: 'Note 1',
+            content_type: 'note',
+            snippet: 'Snippet 1',
+            score: 0.95,
+          },
+          {
+            node_id: 'n-2',
+            title: 'Note 2',
+            content_type: 'concept',
+            snippet: 'Snippet 2',
+            score: 0.8,
+          },
         ],
       },
     })

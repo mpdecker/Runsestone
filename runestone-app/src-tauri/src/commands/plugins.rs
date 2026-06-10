@@ -48,8 +48,8 @@ pub async fn list_available_plugins_impl(plugin_dir: String) -> Result<Vec<Plugi
             let content = std::fs::read_to_string(&manifest_path)
                 .map_err(|e| format!("Failed to read manifest: {}", e))?;
 
-            let plugin: PluginInfo = serde_json::from_str(&content)
-                .map_err(|e| format!("Invalid manifest: {}", e))?;
+            let plugin: PluginInfo =
+                serde_json::from_str(&content).map_err(|e| format!("Invalid manifest: {}", e))?;
 
             plugins.push(PluginInfo {
                 path: path.to_string_lossy().to_string(),
@@ -95,6 +95,5 @@ pub async fn read_plugin_file_impl(
         return Err("Plugin file must be within plugin directory".to_string());
     }
 
-    std::fs::read_to_string(&canonical)
-        .map_err(|e| format!("Failed to read plugin file: {}", e))
+    std::fs::read_to_string(&canonical).map_err(|e| format!("Failed to read plugin file: {}", e))
 }

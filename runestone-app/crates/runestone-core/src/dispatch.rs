@@ -1,6 +1,9 @@
 use crate::context::BackendContext;
 use crate::error::AppError;
-use crate::handlers::{ai, composer, document, embeddings, extraction, graph, node, properties, search, tag, templates, vault, versions};
+use crate::handlers::{
+    ai, composer, document, embeddings, extraction, graph, node, properties, search, tag,
+    templates, vault, versions,
+};
 use crate::models::chat::ChatRequest;
 use crate::models::graph::GraphOptions;
 use crate::models::node::{CreateNodeRequest, ListNodesRequest, UpdateNodeRequest};

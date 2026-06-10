@@ -55,7 +55,7 @@ const mockApi = vi.hoisted(() => ({
       word_count: 1,
       created_at: null,
       updated_at: null,
-    })
+    }),
   ),
   deleteNode: vi.fn().mockResolvedValue(undefined),
   getGraphData: vi.fn().mockResolvedValue({ nodes: [], edges: [] }),
@@ -255,7 +255,9 @@ describe('useStore - async actions', () => {
   })
 
   it('loadVaults fetches and sets vaults', async () => {
-    const vaults = [{ id: 'v-1', name: 'Test', root_path: '/t', created_at: null, updated_at: null }]
+    const vaults = [
+      { id: 'v-1', name: 'Test', root_path: '/t', created_at: null, updated_at: null },
+    ]
     mockApi.listVaults.mockResolvedValueOnce(vaults)
     await useStore.getState().loadVaults()
     expect(useStore.getState().vaults).toEqual(vaults)
@@ -415,8 +417,12 @@ describe('useStore - async actions', () => {
   it('extractFromDocument extracts', async () => {
     const extractions = [
       {
-        name: 'Entity', description: 'Test', extraction_type: 'entity',
-        confidence: 0.8, source_node_id: 'n-1', chunk_index: 0,
+        name: 'Entity',
+        description: 'Test',
+        extraction_type: 'entity',
+        confidence: 0.8,
+        source_node_id: 'n-1',
+        chunk_index: 0,
       },
     ]
     mockApi.extractFromDocument.mockResolvedValueOnce(extractions)
@@ -440,7 +446,9 @@ describe('useStore - async actions', () => {
 
   it('rejectExtraction removes from pending', async () => {
     useStore.setState({
-      pendingExtractions: [{ id: 'e-1', title: 'E1', content_type: 'entity', metadata: null, created_at: null }],
+      pendingExtractions: [
+        { id: 'e-1', title: 'E1', content_type: 'entity', metadata: null, created_at: null },
+      ],
     })
     await useStore.getState().rejectExtraction('e-1')
     expect(useStore.getState().pendingExtractions).toHaveLength(0)
@@ -477,7 +485,9 @@ describe('useStore - async actions', () => {
     expect(useStore.getState().chatMessages[0]).toEqual({ role: 'user', content: 'Hello' })
     expect(useStore.getState().chatMessages[1].role).toBe('assistant')
     expect(useStore.getState().chatAnswer).toBe('Hello back')
-    expect(useStore.getState().chatCitations).toEqual([{ node_id: 'n-1', title: 'N1', snippet: 's' }])
+    expect(useStore.getState().chatCitations).toEqual([
+      { node_id: 'n-1', title: 'N1', snippet: 's' },
+    ])
   })
 
   it('sendChatMessage does nothing without vault', async () => {

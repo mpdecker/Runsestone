@@ -73,10 +73,7 @@ mod tests {
     #[test]
     fn verify_bearer_token_accepts_valid_token() {
         let mut headers = axum::http::HeaderMap::new();
-        headers.insert(
-            AUTHORIZATION,
-            "Bearer secret-token".parse().unwrap(),
-        );
+        headers.insert(AUTHORIZATION, "Bearer secret-token".parse().unwrap());
         assert!(verify_bearer_token(&headers, "secret-token"));
     }
 

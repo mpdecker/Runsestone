@@ -206,7 +206,9 @@ describe('Sidebar', () => {
     useStore.setState({
       selectedVaultId: 'v-1',
       selectedNodeId: 'n-1',
-      suggestedLinks: [{ node_id: 'n-3', title: 'Suggested', content_type: 'note', snippet: '', score: 0.9 }],
+      suggestedLinks: [
+        { node_id: 'n-3', title: 'Suggested', content_type: 'note', snippet: '', score: 0.9 },
+      ],
     })
     render(<Sidebar />)
     expect(screen.getByText('Suggested Links')).toBeInTheDocument()

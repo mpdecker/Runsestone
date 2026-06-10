@@ -23,10 +23,13 @@ impl Default for EmbeddingConfig {
     fn default() -> Self {
         Self {
             provider: std::env::var("EMBEDDING_PROVIDER").unwrap_or_else(|_| "ollama".to_string()),
-            model: std::env::var("EMBEDDING_MODEL").unwrap_or_else(|_| "nomic-embed-text".to_string()),
-            ollama_base_url: std::env::var("OLLAMA_BASE_URL").unwrap_or_else(|_| "http://localhost:11434".to_string()),
+            model: std::env::var("EMBEDDING_MODEL")
+                .unwrap_or_else(|_| "nomic-embed-text".to_string()),
+            ollama_base_url: std::env::var("OLLAMA_BASE_URL")
+                .unwrap_or_else(|_| "http://localhost:11434".to_string()),
             openai_api_key: std::env::var("OPENAI_API_KEY").unwrap_or_default(),
-            openai_base_url: std::env::var("OPENAI_BASE_URL").unwrap_or_else(|_| "https://api.openai.com/v1".to_string()),
+            openai_base_url: std::env::var("OPENAI_BASE_URL")
+                .unwrap_or_else(|_| "https://api.openai.com/v1".to_string()),
         }
     }
 }

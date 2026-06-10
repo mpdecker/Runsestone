@@ -1,7 +1,7 @@
-use runestone_core::handlers::ai;
 use crate::models::chat::{ChatRequest, ChatResponse, TagSuggestion};
 use crate::router::dispatch;
 use crate::state::AppState;
+use runestone_core::handlers::ai;
 use tauri::Emitter;
 use uuid::Uuid;
 

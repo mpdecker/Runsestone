@@ -49,7 +49,18 @@ describe('NodeActions', () => {
     it('shows Parse Links button when currentNode exists', () => {
       useStore.setState({
         selectedNodeId: 'n-1',
-        currentNode: { id: 'n-1', vault_id: 'v-1', title: 'Test', content: '[[link]]', content_type: 'note', file_path: null, metadata: null, word_count: 1, created_at: null, updated_at: null },
+        currentNode: {
+          id: 'n-1',
+          vault_id: 'v-1',
+          title: 'Test',
+          content: '[[link]]',
+          content_type: 'note',
+          file_path: null,
+          metadata: null,
+          word_count: 1,
+          created_at: null,
+          updated_at: null,
+        },
       })
       render(<NodeActions />)
       expect(screen.getByText('Parse Links')).toBeInTheDocument()
@@ -71,7 +82,12 @@ describe('NodeActions', () => {
 
     it('calls toggleBacklinks on click', () => {
       let toggled = false
-      useStore.setState({ selectedNodeId: 'n-1', toggleBacklinks: () => { toggled = true } } as any)
+      useStore.setState({
+        selectedNodeId: 'n-1',
+        toggleBacklinks: () => {
+          toggled = true
+        },
+      } as any)
       render(<NodeActions />)
       fireEvent.click(screen.getByText('Show Backlinks'))
       expect(toggled).toBe(true)
@@ -81,7 +97,9 @@ describe('NodeActions', () => {
       useStore.setState({
         selectedNodeId: 'n-1',
         showBacklinks: true,
-        backlinks: [{ node_id: 'n-2', title: 'Linked Note', content_type: 'note', context: 'refers to...' }],
+        backlinks: [
+          { node_id: 'n-2', title: 'Linked Note', content_type: 'note', context: 'refers to...' },
+        ],
       })
       render(<NodeActions />)
       expect(screen.getByText('Linked Note')).toBeInTheDocument()
@@ -99,7 +117,9 @@ describe('NodeActions', () => {
       useStore.setState({
         selectedNodeId: 'n-1',
         showOutgoingLinks: true,
-        outgoingLinks: [{ node_id: 'n-3', title: 'Target', content_type: 'note', context: 'link text' }],
+        outgoingLinks: [
+          { node_id: 'n-3', title: 'Target', content_type: 'note', context: 'link text' },
+        ],
       })
       render(<NodeActions />)
       expect(screen.getByText('Target')).toBeInTheDocument()
@@ -109,7 +129,14 @@ describe('NodeActions', () => {
       useStore.setState({
         selectedNodeId: 'n-1',
         showOutgoingLinks: true,
-        outgoingLinks: [{ node_id: '00000000-0000-0000-0000-000000000000', title: 'Unresolved', content_type: 'unresolved', context: null }],
+        outgoingLinks: [
+          {
+            node_id: '00000000-0000-0000-0000-000000000000',
+            title: 'Unresolved',
+            content_type: 'unresolved',
+            context: null,
+          },
+        ],
       })
       render(<NodeActions />)
       expect(screen.getByText('Unresolved')).toBeInTheDocument()

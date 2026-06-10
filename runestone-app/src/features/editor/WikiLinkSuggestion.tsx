@@ -33,7 +33,11 @@ function WikiLinkList({
   command: (item: NodeItem) => void
 }) {
   return (
-    <div className="bg-card border rounded-lg shadow-lg p-1 max-h-48 overflow-y-auto min-w-[200px]" role="listbox" aria-label="Wiki link suggestions">
+    <div
+      className="bg-card border rounded-lg shadow-lg p-1 max-h-48 overflow-y-auto min-w-[200px]"
+      role="listbox"
+      aria-label="Wiki link suggestions"
+    >
       {items.length > 0 ? (
         items.map((item, index) => (
           <button
@@ -49,7 +53,9 @@ function WikiLinkList({
             }}
           >
             <span className="truncate">{item.title}</span>
-            <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{item.content_type}</span>
+            <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
+              {item.content_type}
+            </span>
           </button>
         ))
       ) : (

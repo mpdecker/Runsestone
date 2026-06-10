@@ -17,9 +17,7 @@ describe('buildTree', () => {
   })
 
   it('puts nodes without file_path in Unsorted folder', () => {
-    const nodes = [
-      { id: 'n-1', title: 'Orphan', content_type: 'note', file_path: null },
-    ]
+    const nodes = [{ id: 'n-1', title: 'Orphan', content_type: 'note', file_path: null }]
 
     const tree = buildTree(nodes)
 
@@ -36,7 +34,12 @@ describe('buildTree', () => {
 
   it('preserves node metadata on file nodes', () => {
     const nodes = [
-      { id: 'node-123', title: 'Title', content_type: 'entity', file_path: 'projects/myproject/index.md' },
+      {
+        id: 'node-123',
+        title: 'Title',
+        content_type: 'entity',
+        file_path: 'projects/myproject/index.md',
+      },
     ]
 
     const tree = buildTree(nodes)

@@ -38,9 +38,7 @@ export function ClipperPanel() {
             Server running on port <span className="text-accent-foreground">{clipperPort}</span>
           </p>
           {clipperAuthToken && (
-            <p className="text-[10px] text-muted-foreground break-all">
-              Token: {clipperAuthToken}
-            </p>
+            <p className="text-[10px] text-muted-foreground break-all">Token: {clipperAuthToken}</p>
           )}
           <p className="text-[10px] text-muted-foreground">
             Install the Chrome extension and set port to {clipperPort}.
