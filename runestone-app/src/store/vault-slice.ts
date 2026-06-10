@@ -71,7 +71,15 @@ export const createVaultSlice: StateCreator<AppStore, [], [], VaultSlice> = (set
   },
 
   selectVault: (vaultId: string) => {
-    set({ selectedVaultId: vaultId, selectedNodeId: null, currentNode: null, nodes: [], graphData: null, nodeTags: null, selectedTag: null })
+    set({
+      selectedVaultId: vaultId,
+      selectedNodeId: null,
+      currentNode: null,
+      nodes: [],
+      graphData: null,
+      nodeTags: null,
+      selectedTag: null,
+    })
     get().loadNodes()
     get().loadGraphData()
     get().loadVaultTags?.()

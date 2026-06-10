@@ -7,7 +7,11 @@ const mockApi = vi.hoisted(() => ({
     fts_results: [],
     combined: [{ node_id: 'n-1', title: 'Hit', content_type: 'note', snippet: '...', score: 0.9 }],
   }),
-  findSimilar: vi.fn().mockResolvedValue([{ node_id: 'n-2', title: 'Similar', content_type: 'note', snippet: '...', score: 0.8 }]),
+  findSimilar: vi
+    .fn()
+    .mockResolvedValue([
+      { node_id: 'n-2', title: 'Similar', content_type: 'note', snippet: '...', score: 0.8 },
+    ]),
 }))
 
 vi.mock('@/lib/api', () => ({ ...mockApi }))

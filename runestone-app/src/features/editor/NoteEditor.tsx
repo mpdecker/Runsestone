@@ -77,7 +77,13 @@ export function NoteEditor({ secondary = false }: Props) {
   const activeNode = secondary ? secondaryNode : currentNode
   const activeNodeId = secondary ? secondaryTabId : selectedNodeId
   const saveTimerRef = useRef<number | null>(null)
-  const [preview, setPreview] = useState<PreviewState>({ visible: false, x: 0, y: 0, node: null, snippet: null })
+  const [preview, setPreview] = useState<PreviewState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    node: null,
+    snippet: null,
+  })
   const previewTimerRef = useRef<number | null>(null)
 
   const editorRef = useRef<Editor | null>(null)
@@ -188,47 +194,53 @@ export function NoteEditor({ secondary = false }: Props) {
     saveNode(secondary)
   }, [saveNode, secondary])
 
-  const handleEditorClick = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement
-    const linkEl = target.closest('[data-type="wiki-link"]')
-    if (linkEl) {
-      const title = linkEl.getAttribute('data-title')
-      if (title) {
-        const matched = nodes.find((n) => n.title === title)
-        if (matched) {
-          selectNode(matched.id)
+  const handleEditorClick = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement
+      const linkEl = target.closest('[data-type="wiki-link"]')
+      if (linkEl) {
+        const title = linkEl.getAttribute('data-title')
+        if (title) {
+          const matched = nodes.find((n) => n.title === title)
+          if (matched) {
+            selectNode(matched.id)
+          }
         }
       }
-    }
-  }, [nodes, selectNode])
+    },
+    [nodes, selectNode],
+  )
 
-  const handleMouseOver = useCallback((e: React.MouseEvent) => {
-    const target = e.target as HTMLElement
-    const linkEl = target.closest('[data-type="wiki-link"]')
-    if (linkEl) {
-      const title = linkEl.getAttribute('data-title')
-      if (title) {
-        const matched = nodes.find((n) => n.title === title)
-        if (matched) {
-          if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
-          previewTimerRef.current = window.setTimeout(async () => {
-            const rect = linkEl.getBoundingClientRect()
-            const snippet = await fetchWikiLinkPreview(matched.id)
-            setPreview({
-              visible: true,
-              x: rect.left,
-              y: rect.bottom + 4,
-              node: matched,
-              snippet,
-            })
-          }, 400)
+  const handleMouseOver = useCallback(
+    (e: React.MouseEvent) => {
+      const target = e.target as HTMLElement
+      const linkEl = target.closest('[data-type="wiki-link"]')
+      if (linkEl) {
+        const title = linkEl.getAttribute('data-title')
+        if (title) {
+          const matched = nodes.find((n) => n.title === title)
+          if (matched) {
+            if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
+            previewTimerRef.current = window.setTimeout(async () => {
+              const rect = linkEl.getBoundingClientRect()
+              const snippet = await fetchWikiLinkPreview(matched.id)
+              setPreview({
+                visible: true,
+                x: rect.left,
+                y: rect.bottom + 4,
+                node: matched,
+                snippet,
+              })
+            }, 400)
+          }
         }
+      } else {
+        if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
+        setPreview((p) => (p.visible ? { ...p, visible: false } : p))
       }
-    } else {
-      if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
-      setPreview((p) => (p.visible ? { ...p, visible: false } : p))
-    }
-  }, [nodes, fetchWikiLinkPreview])
+    },
+    [nodes, fetchWikiLinkPreview],
+  )
 
   const handleMouseLeave = useCallback(() => {
     if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
@@ -254,7 +266,12 @@ export function NoteEditor({ secondary = false }: Props) {
         <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
           <AudioRecorder editor={editor} />
           <span>{activeNode.word_count} words</span>
-          <Button variant="ghost" size="sm" onClick={toggleReadingMode} className="h-6 text-xs px-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleReadingMode}
+            className="h-6 text-xs px-1"
+          >
             {readingMode ? 'Edit' : 'Read'}
           </Button>
           <Button variant="outline" size="sm" onClick={handleSave} className="h-6 text-xs">
@@ -289,7 +306,10 @@ export function NoteEditor({ secondary = false }: Props) {
               </div>
             )}
             <div className="text-muted-foreground text-[10px]">
-              Updated: {preview.node.updated_at ? new Date(preview.node.updated_at).toLocaleDateString() : 'N/A'}
+              Updated:{' '}
+              {preview.node.updated_at
+                ? new Date(preview.node.updated_at).toLocaleDateString()
+                : 'N/A'}
             </div>
           </div>
         )}

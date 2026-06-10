@@ -87,7 +87,7 @@ export const createUISlice: StateCreator<AppStore, [], [], UISlice> = (set, get)
 
   toggleSplitMode: () => {
     set((s: { splitMode: string }) => ({
-      splitMode: s.splitMode === 'vertical' ? 'off' : 'vertical'
+      splitMode: s.splitMode === 'vertical' ? 'off' : 'vertical',
     }))
   },
 

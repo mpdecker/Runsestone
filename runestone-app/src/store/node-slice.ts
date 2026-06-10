@@ -6,9 +6,7 @@ import * as api from '../lib/api'
 
 let vaultWatcherUnlisten: (() => void) | null = null
 
-export async function setupVaultFileWatcher(
-  reload: () => Promise<void>,
-): Promise<void> {
+export async function setupVaultFileWatcher(reload: () => Promise<void>): Promise<void> {
   if (typeof window === 'undefined' || !('__TAURI_INTERNALS__' in window)) {
     return
   }
@@ -101,7 +99,13 @@ export const createNodeSlice: StateCreator<AppStore, [], [], NodeSlice> = (set, 
   },
 
   selectNode: async (nodeId: string) => {
-    set({ nodeLoading: true, nodeError: null, isEditorDirty: false, showBacklinks: false, backlinks: [] })
+    set({
+      nodeLoading: true,
+      nodeError: null,
+      isEditorDirty: false,
+      showBacklinks: false,
+      backlinks: [],
+    })
     try {
       const node = await api.getNode(nodeId)
       set({ selectedNodeId: nodeId, currentNode: node, nodeLoading: false })

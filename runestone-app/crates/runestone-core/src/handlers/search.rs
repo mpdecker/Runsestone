@@ -8,12 +8,8 @@ const MAX_REGEX_PATTERN_LEN: usize = 200;
 const RRF_K: f64 = 60.0;
 
 /// Reciprocal Rank Fusion: merges ranked result lists by node_id.
-pub fn rrf_fusion(
-    ranked_lists: &[Vec<SearchResult>],
-    limit: usize,
-) -> Vec<SearchResult> {
-    let mut scores: std::collections::HashMap<uuid::Uuid, f64> =
-        std::collections::HashMap::new();
+pub fn rrf_fusion(ranked_lists: &[Vec<SearchResult>], limit: usize) -> Vec<SearchResult> {
+    let mut scores: std::collections::HashMap<uuid::Uuid, f64> = std::collections::HashMap::new();
     let mut best: std::collections::HashMap<uuid::Uuid, SearchResult> =
         std::collections::HashMap::new();
 
@@ -31,12 +27,7 @@ pub fn rrf_fusion(
 
     fused
         .into_iter()
-        .filter_map(|(id, score)| {
-            best.get(&id).map(|r| SearchResult {
-                score,
-                ..r.clone()
-            })
-        })
+        .filter_map(|(id, score)| best.get(&id).map(|r| SearchResult { score, ..r.clone() }))
         .collect()
 }
 

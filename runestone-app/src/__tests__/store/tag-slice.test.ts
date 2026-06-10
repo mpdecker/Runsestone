@@ -11,7 +11,18 @@ const mockApi = vi.hoisted(() => ({
   acceptTagSuggestions: vi.fn().mockResolvedValue({ node_id: 'n-1', tags: ['ai', 'ml'] }),
   listTags: vi.fn().mockResolvedValue([{ name: 'typescript', node_count: 3 }]),
   getNodesByTag: vi.fn().mockResolvedValue([]),
-  getNode: vi.fn().mockResolvedValue({ id: 'n-1', vault_id: 'v-1', title: 'Test', content: '<p>Hi</p>', content_type: 'note', file_path: null, metadata: {}, word_count: 1, created_at: null, updated_at: null }),
+  getNode: vi.fn().mockResolvedValue({
+    id: 'n-1',
+    vault_id: 'v-1',
+    title: 'Test',
+    content: '<p>Hi</p>',
+    content_type: 'note',
+    file_path: null,
+    metadata: {},
+    word_count: 1,
+    created_at: null,
+    updated_at: null,
+  }),
   loadGraphData: vi.fn().mockResolvedValue({ nodes: [], edges: [] }),
 }))
 
@@ -46,7 +57,10 @@ describe('tag-slice', () => {
       await useStore.getState().loadNodeTags('n-1')
 
       expect(mockApi.getNodeTags).toHaveBeenCalledWith('n-1')
-      expect(useStore.getState().nodeTags).toEqual({ node_id: 'n-1', tags: ['typescript', 'react'] })
+      expect(useStore.getState().nodeTags).toEqual({
+        node_id: 'n-1',
+        tags: ['typescript', 'react'],
+      })
     })
 
     it('handles API error gracefully', async () => {
@@ -64,7 +78,10 @@ describe('tag-slice', () => {
     it('calls API and updates nodeTags after adding tags', async () => {
       useStore.setState({ selectedVaultId: 'v-1' })
       mockApi.addTagsToNode.mockResolvedValue({ node_id: 'n-1', tags: ['a', 'b', 'c'] })
-      mockApi.listTags.mockResolvedValue([{ name: 'a', node_count: 1 }, { name: 'b', node_count: 1 }])
+      mockApi.listTags.mockResolvedValue([
+        { name: 'a', node_count: 1 },
+        { name: 'b', node_count: 1 },
+      ])
 
       await useStore.getState().addTags('n-1', ['c'])
 

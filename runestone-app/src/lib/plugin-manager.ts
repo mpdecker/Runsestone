@@ -29,8 +29,12 @@ export function getPluginManager() {
     isLoaded: (name: string) => plugins.has(name),
     getPanels: () => Array.from(panels.values()),
     getCommands: () => Array.from(commands.values()),
-    onPanelsChange: (cb: () => void) => { onPanelsChange = cb },
-    onCommandsChange: (cb: () => void) => { onCommandsChange = cb },
+    onPanelsChange: (cb: () => void) => {
+      onPanelsChange = cb
+    },
+    onCommandsChange: (cb: () => void) => {
+      onCommandsChange = cb
+    },
 
     setAPI: (api: PluginAPI) => {
       pluginAPI = api

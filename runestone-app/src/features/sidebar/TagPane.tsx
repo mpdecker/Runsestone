@@ -43,14 +43,14 @@ export function TagPane() {
               title={`${t.name} (${t.node_count ?? 0} notes)`}
             >
               #{t.name}
-              {t.node_count != null && (
-                <span className="ml-0.5 opacity-60">{t.node_count}</span>
-              )}
+              {t.node_count != null && <span className="ml-0.5 opacity-60">{t.node_count}</span>}
             </button>
           ))}
         </div>
       ) : (
-        <p className="text-[10px] text-muted-foreground px-1">No tags yet. Add tags to notes to organize them.</p>
+        <p className="text-[10px] text-muted-foreground px-1">
+          No tags yet. Add tags to notes to organize them.
+        </p>
       )}
     </div>
   )

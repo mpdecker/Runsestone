@@ -4,9 +4,13 @@ import { Button } from '@/components/ui/button'
 
 export function VaultList() {
   const {
-    vaults, selectedVaultId,
-    createVault, selectVault,
-    initDb, toggleDarkMode, darkMode,
+    vaults,
+    selectedVaultId,
+    createVault,
+    selectVault,
+    initDb,
+    toggleDarkMode,
+    darkMode,
     toggleSidebar,
   } = useStore()
 
@@ -19,16 +23,33 @@ export function VaultList() {
       <div className="flex items-center justify-between mb-2">
         <h2 className="font-semibold text-sm">Vaults</h2>
         <div className="flex gap-1">
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={toggleDarkMode} title="Toggle dark mode">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={toggleDarkMode}
+            title="Toggle dark mode"
+          >
             <span className="text-xs">{darkMode ? '\u2600' : '\u263E'}</span>
           </Button>
           <Button variant="ghost" size="icon" className="h-7 w-7" onClick={initDb} title="Init DB">
             <span className="text-xs">DB</span>
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={() => setShowNewVault(!showNewVault)}>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={() => setShowNewVault(!showNewVault)}
+          >
             <span className="text-lg leading-none">+</span>
           </Button>
-          <Button variant="ghost" size="icon" className="h-7 w-7" onClick={toggleSidebar} title="Collapse sidebar (Ctrl+Shift+B)">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-7 w-7"
+            onClick={toggleSidebar}
+            title="Collapse sidebar (Ctrl+Shift+B)"
+          >
             <span className="text-sm">\u25C0</span>
           </Button>
         </div>
@@ -49,7 +70,10 @@ export function VaultList() {
             onChange={(e) => setVaultPath(e.target.value)}
           />
           <div className="flex gap-1">
-            <Button size="sm" variant="outline" className="text-xs h-7"
+            <Button
+              size="sm"
+              variant="outline"
+              className="text-xs h-7"
               onClick={async () => {
                 if (vaultName && vaultPath) {
                   await createVault(vaultName, vaultPath)
@@ -61,7 +85,10 @@ export function VaultList() {
             >
               Create
             </Button>
-            <Button size="sm" variant="ghost" className="text-xs h-7"
+            <Button
+              size="sm"
+              variant="ghost"
+              className="text-xs h-7"
               onClick={() => setShowNewVault(false)}
             >
               Cancel

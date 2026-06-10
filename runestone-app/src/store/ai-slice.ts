@@ -64,33 +64,32 @@ export const createAISlice: StateCreator<AppStore, [], [], AISlice> = (set, get)
     })
 
     let streamUnlisten: (() => void) | null = null
-    const canStream =
-      typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
+    const canStream = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
     try {
       if (canStream) {
         streamUnlisten = await listen<string>('chat-stream-chunk', (event) => {
-        set((s: { chatMessages: ChatMessage[] }) => {
-          const msgs = [...s.chatMessages]
-          const last = msgs[msgs.length - 1]
-          if (last?.role === 'assistant') {
-            msgs[msgs.length - 1] = { ...last, content: last.content + event.payload }
-          }
-          return { chatMessages: msgs }
+          set((s: { chatMessages: ChatMessage[] }) => {
+            const msgs = [...s.chatMessages]
+            const last = msgs[msgs.length - 1]
+            if (last?.role === 'assistant') {
+              msgs[msgs.length - 1] = { ...last, content: last.content + event.payload }
+            }
+            return { chatMessages: msgs }
+          })
         })
-      })
       }
 
       const response: ChatResponse = canStream
         ? await api.chatWithGraphStream({
-        vault_id: selectedVaultId,
-        question,
-        history: chatMessages.slice(-10),
-      })
+            vault_id: selectedVaultId,
+            question,
+            history: chatMessages.slice(-10),
+          })
         : await api.chatWithGraph({
-        vault_id: selectedVaultId,
-        question,
-        history: chatMessages.slice(-10),
-      })
+            vault_id: selectedVaultId,
+            question,
+            history: chatMessages.slice(-10),
+          })
 
       set((s: { chatMessages: ChatMessage[] }) => {
         const msgs = [...s.chatMessages]

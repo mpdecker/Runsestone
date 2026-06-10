@@ -52,10 +52,7 @@ export function GraphCanvas() {
 
   const nodeCount = graphData?.nodes.length ?? 0
   const edgeCount = graphData?.edges.length ?? 0
-  const graphSignature = useMemo(
-    () => `${nodeCount}:${edgeCount}`,
-    [nodeCount, edgeCount],
-  )
+  const graphSignature = useMemo(() => `${nodeCount}:${edgeCount}`, [nodeCount, edgeCount])
 
   const updateGraph = useCallback(() => {
     if (!cyRef.current || !graphData) return
@@ -145,15 +142,15 @@ export function GraphCanvas() {
               const t = el.data('content_type') as string
               return NODE_COLORS[t] || '#94a3b8'
             },
-            'label': 'data(label)',
+            label: 'data(label)',
             'font-size': '10px',
             'text-valign': 'bottom',
             'text-halign': 'center',
-            'color': '#cbd5e1',
+            color: '#cbd5e1',
             'text-outline-color': '#1e293b',
             'text-outline-width': 1,
-            'width': 12,
-            'height': 12,
+            width: 12,
+            height: 12,
           },
         },
         {
@@ -161,14 +158,14 @@ export function GraphCanvas() {
           style: {
             'border-width': 2,
             'border-color': '#fff',
-            'width': 16,
-            'height': 16,
+            width: 16,
+            height: 16,
           },
         },
         {
           selector: 'edge',
           style: {
-            'width': 1,
+            width: 1,
             'line-color': (el) => {
               const t = el.data('label') as string
               return EDGE_COLORS[t] || '#64748b'
@@ -179,7 +176,7 @@ export function GraphCanvas() {
             },
             'target-arrow-shape': 'triangle',
             'curve-style': 'bezier',
-            'opacity': 0.6,
+            opacity: 0.6,
           },
         },
       ],
@@ -230,7 +227,10 @@ export function GraphCanvas() {
     <div className="flex-1 flex flex-col min-h-0 bg-slate-950">
       <div className="border-b border-slate-800 px-3 py-1.5 flex items-center gap-3 text-xs flex-wrap">
         <span className="text-slate-400">
-          {graphData.nodes.length > MAX_RENDER_NODES ? `${MAX_RENDER_NODES}+` : graphData.nodes.length} nodes, {graphData.edges.length} edges
+          {graphData.nodes.length > MAX_RENDER_NODES
+            ? `${MAX_RENDER_NODES}+`
+            : graphData.nodes.length}{' '}
+          nodes, {graphData.edges.length} edges
         </span>
         <div className="flex gap-1">
           <button
@@ -267,9 +267,7 @@ export function GraphCanvas() {
             ))}
           </div>
         )}
-        <span className="text-slate-500 text-[10px]">
-          Double-click node for local view
-        </span>
+        <span className="text-slate-500 text-[10px]">Double-click node for local view</span>
       </div>
       <div ref={containerRef} className="flex-1" />
     </div>

@@ -3,12 +3,7 @@ import { useStore } from '@/store'
 import { Button } from '@/components/ui/button'
 
 export function PropertiesPanel() {
-  const {
-    selectedNodeId,
-    nodeProperties,
-    setProperty,
-    removeProperty,
-  } = useStore()
+  const { selectedNodeId, nodeProperties, setProperty, removeProperty } = useStore()
 
   const [newKey, setNewKey] = useState('')
   const [newType, setNewType] = useState('text')
@@ -98,7 +93,9 @@ export function PropertiesPanel() {
             placeholder="Key"
             value={newKey}
             onChange={(e) => setNewKey(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAdd()
+            }}
           />
           <select
             className="w-16 px-1 py-0.5 text-[10px] border rounded bg-background"
@@ -114,20 +111,15 @@ export function PropertiesPanel() {
           <input
             className="flex-1 px-1 py-0.5 text-[10px] border rounded bg-background"
             placeholder={
-              newType === 'text' ? 'Value'
-                : newType === 'number' ? 'Number'
-                : 'true/false'
+              newType === 'text' ? 'Value' : newType === 'number' ? 'Number' : 'true/false'
             }
             value={newValue}
             onChange={(e) => setNewValue(e.target.value)}
-            onKeyDown={(e) => { if (e.key === 'Enter') handleAdd() }}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') handleAdd()
+            }}
           />
-          <Button
-            variant="outline"
-            size="sm"
-            className="text-[10px] h-5 px-1"
-            onClick={handleAdd}
-          >
+          <Button variant="outline" size="sm" className="text-[10px] h-5 px-1" onClick={handleAdd}>
             Add
           </Button>
         </div>

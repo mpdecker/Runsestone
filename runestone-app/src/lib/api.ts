@@ -149,7 +149,12 @@ export async function booleanSearch(query: SearchQuery): Promise<SearchResult[]>
   return invoke('boolean_search', { query })
 }
 
-export async function regexSearch(vaultId: string, pattern: string, caseSensitive?: boolean, limit?: number): Promise<SearchResult[]> {
+export async function regexSearch(
+  vaultId: string,
+  pattern: string,
+  caseSensitive?: boolean,
+  limit?: number,
+): Promise<SearchResult[]> {
   return invoke('regex_search', { vaultId, pattern, caseSensitive, limit })
 }
 
@@ -241,7 +246,10 @@ export async function suggestTags(nodeId: string): Promise<TagSuggestion[]> {
   return invoke('suggest_tags', { nodeId })
 }
 
-export async function importObsidianVault(vaultId: string, rootPath: string): Promise<ObsidianImportResult> {
+export async function importObsidianVault(
+  vaultId: string,
+  rootPath: string,
+): Promise<ObsidianImportResult> {
   return invoke('import_obsidian_vault', { vaultId, rootPath })
 }
 

@@ -1,6 +1,6 @@
-use crate::router::dispatch;
-use crate::models::graph::{Backlink, GraphData, GraphOptions};
 use crate::models::graph::WikiLinkRow;
+use crate::models::graph::{Backlink, GraphData, GraphOptions};
+use crate::router::dispatch;
 use crate::state::AppState;
 use uuid::Uuid;
 

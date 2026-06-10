@@ -5,9 +5,7 @@ import { Server, Moon, Sun, Monitor } from 'lucide-react'
 
 export function MobileSettingsView() {
   const { darkMode, toggleDarkMode } = useStore()
-  const [serverUrl, setServerUrl] = useState(
-    localStorage.getItem('runestone_server_url') || ''
-  )
+  const [serverUrl, setServerUrl] = useState(localStorage.getItem('runestone_server_url') || '')
   const [connectionStatus, setConnectionStatus] = useState<string>('')
 
   const handleTestConnection = async () => {
@@ -63,7 +61,9 @@ export function MobileSettingsView() {
               </button>
             </div>
             {connectionStatus && (
-              <p className={`text-xs ${connectionStatus === 'Connected' || connectionStatus === 'Saved' ? 'text-green-600' : 'text-destructive'}`}>
+              <p
+                className={`text-xs ${connectionStatus === 'Connected' || connectionStatus === 'Saved' ? 'text-green-600' : 'text-destructive'}`}
+              >
                 {connectionStatus}
               </p>
             )}
@@ -80,11 +80,7 @@ export function MobileSettingsView() {
           >
             <span className="text-sm">Dark Mode</span>
             <span className="flex items-center gap-2 text-sm text-muted-foreground">
-              {darkMode ? (
-                <Moon className="w-4 h-4" />
-              ) : (
-                <Sun className="w-4 h-4" />
-              )}
+              {darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
               {darkMode ? 'On' : 'Off'}
             </span>
           </button>

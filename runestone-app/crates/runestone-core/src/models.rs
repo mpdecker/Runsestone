@@ -1,32 +1,35 @@
-pub mod vault;
-pub mod node;
-pub mod graph;
-pub mod search;
-pub mod extraction;
 pub mod chat;
+pub mod extraction;
+pub mod graph;
+pub mod node;
 pub mod obsidian;
-pub mod tag;
 pub mod properties;
+pub mod search;
+pub mod tag;
+pub mod vault;
 pub mod version;
 
 #[allow(unused_imports)]
-pub use vault::{CreateVaultRequest, Vault};
-#[allow(unused_imports)]
-pub use node::{CreateNodeRequest, ListNodesRequest, Node, NodeIdRow, NodeListItem, ScanVaultResult, UpdateNodeRequest};
-#[allow(unused_imports)]
-pub use graph::{Backlink, GraphData, GraphEdge, GraphNode, WikiLinkRow};
-#[allow(unused_imports)]
-pub use search::{SearchQuery, SearchResult, SearchResults};
+pub use chat::{ChatMessage, ChatRequest, ChatResponse, Citation, TagSuggestion};
 #[allow(unused_imports)]
 pub use extraction::{ExtractionNode, PendingExtraction};
 #[allow(unused_imports)]
-pub use chat::{ChatMessage, ChatRequest, ChatResponse, Citation, TagSuggestion};
+pub use graph::{Backlink, GraphData, GraphEdge, GraphNode, WikiLinkRow};
+#[allow(unused_imports)]
+pub use node::{
+    CreateNodeRequest, ListNodesRequest, Node, NodeIdRow, NodeListItem, ScanVaultResult,
+    UpdateNodeRequest,
+};
 #[allow(unused_imports)]
 pub use obsidian::ObsidianImportResult;
 #[allow(unused_imports)]
 pub use properties::{NodeProperty, PropertiesResponse, SetPropertyRequest};
 #[allow(unused_imports)]
+pub use search::{SearchQuery, SearchResult, SearchResults};
+#[allow(unused_imports)]
 pub use tag::{AddTagsRequest, RemoveTagRequest, TagInfo, TagsResponse};
+#[allow(unused_imports)]
+pub use vault::{CreateVaultRequest, Vault};
 #[allow(unused_imports)]
 pub use version::NodeVersion;
 

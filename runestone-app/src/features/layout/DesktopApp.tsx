@@ -5,27 +5,25 @@ import { TabBar } from '@/features/editor/TabBar'
 import { useStore } from '@/store'
 import { setupVaultFileWatcher } from '@/store/node-slice'
 
-const NoteEditor = lazy(() =>
-  import('@/features/editor').then((m) => ({ default: m.NoteEditor })),
-)
+const NoteEditor = lazy(() => import('@/features/editor').then((m) => ({ default: m.NoteEditor })))
 const SearchPanel = lazy(() =>
   import('@/features/search').then((m) => ({ default: m.SearchPanel })),
 )
-const GraphCanvas = lazy(() =>
-  import('@/features/graph').then((m) => ({ default: m.GraphCanvas })),
-)
+const GraphCanvas = lazy(() => import('@/features/graph').then((m) => ({ default: m.GraphCanvas })))
 const ExtractionReview = lazy(() =>
   import('@/features/extraction').then((m) => ({ default: m.ExtractionReview })),
 )
 const CommandPalette = lazy(() =>
   import('@/features/command-palette').then((m) => ({ default: m.CommandPalette })),
 )
-const ChatPanel = lazy(() =>
-  import('@/features/chat').then((m) => ({ default: m.ChatPanel })),
-)
+const ChatPanel = lazy(() => import('@/features/chat').then((m) => ({ default: m.ChatPanel })))
 
 function PanelFallback() {
-  return <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground">Loading...</div>
+  return (
+    <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground">
+      Loading...
+    </div>
+  )
 }
 
 export function DesktopApp() {
@@ -213,7 +211,9 @@ export function DesktopApp() {
                 </button>
               </div>
             )}
-            <div className={`flex-1 min-h-0 flex flex-col ${splitMode === 'vertical' ? 'divide-y' : ''}`}>
+            <div
+              className={`flex-1 min-h-0 flex flex-col ${splitMode === 'vertical' ? 'divide-y' : ''}`}
+            >
               <div className={splitMode === 'vertical' ? 'flex-1 min-h-0' : 'flex-1 min-h-0'}>
                 <Suspense fallback={<PanelFallback />}>
                   <NoteEditor />

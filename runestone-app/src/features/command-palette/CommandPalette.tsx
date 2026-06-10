@@ -33,7 +33,16 @@ function fuzzyMatch(pattern: string, text: string): number | null {
 }
 
 export function CommandPalette() {
-  const { showCommandPalette, toggleCommandPalette, createNode, toggleSearch, toggleExtractions, nodes, selectNode, registeredCommands } = useStore(
+  const {
+    showCommandPalette,
+    toggleCommandPalette,
+    createNode,
+    toggleSearch,
+    toggleExtractions,
+    nodes,
+    selectNode,
+    registeredCommands,
+  } = useStore(
     useShallow((s) => ({
       showCommandPalette: s.showCommandPalette,
       toggleCommandPalette: s.toggleCommandPalette,
@@ -60,9 +69,33 @@ export function CommandPalette() {
 
   const baseCommands: Command[] = useMemo(() => {
     const cmds: Command[] = [
-      { id: 'new-note', label: 'New Note', shortcut: 'Ctrl+N', action: () => { toggleCommandPalette(); createNode('Untitled') } },
-      { id: 'search', label: 'Search', shortcut: 'Ctrl+K', action: () => { toggleCommandPalette(); toggleSearch() } },
-      { id: 'extractions', label: 'Extractions', shortcut: 'Ctrl+Shift+E', action: () => { toggleCommandPalette(); toggleExtractions() } },
+      {
+        id: 'new-note',
+        label: 'New Note',
+        shortcut: 'Ctrl+N',
+        action: () => {
+          toggleCommandPalette()
+          createNode('Untitled')
+        },
+      },
+      {
+        id: 'search',
+        label: 'Search',
+        shortcut: 'Ctrl+K',
+        action: () => {
+          toggleCommandPalette()
+          toggleSearch()
+        },
+      },
+      {
+        id: 'extractions',
+        label: 'Extractions',
+        shortcut: 'Ctrl+Shift+E',
+        action: () => {
+          toggleCommandPalette()
+          toggleExtractions()
+        },
+      },
     ]
     if (registeredCommands) {
       for (const cmd of registeredCommands) {
@@ -70,7 +103,10 @@ export function CommandPalette() {
           id: cmd.id,
           label: cmd.label,
           shortcut: '',
-          action: () => { toggleCommandPalette(); cmd.handler() },
+          action: () => {
+            toggleCommandPalette()
+            cmd.handler()
+          },
         })
       }
     }
@@ -84,7 +120,7 @@ export function CommandPalette() {
         const score = fuzzyMatch(query, n.title)
         return { node: n, score }
       })
-      .filter((x): x is { node: typeof nodes[0]; score: number } => x.score !== null)
+      .filter((x): x is { node: (typeof nodes)[0]; score: number } => x.score !== null)
       .sort((a, b) => b.score - a.score)
       .slice(0, 10)
     return scored
@@ -100,13 +136,14 @@ export function CommandPalette() {
       .filter((x): x is { cmd: Command; score: number } => x.score !== null)
       .sort((a, b) => b.score - a.score)
     return scored
-  }, [query])
+  }, [query, baseCommands])
 
   const totalItems = filteredCommands.length + filteredNodes.length
 
-  useEffect(() => {
+  const handleQueryChange = (value: string) => {
+    setQuery(value)
     setSelectedIndex(0)
-  }, [query])
+  }
 
   useEffect(() => {
     if (!showCommandPalette) return
@@ -187,14 +224,16 @@ export function CommandPalette() {
           className="w-full px-4 py-3 text-sm bg-transparent border-b outline-none"
           placeholder="Search notes or commands..."
           value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          onChange={(e) => handleQueryChange(e.target.value)}
           onKeyDown={handleKeyDown}
         />
         <div className="max-h-64 overflow-y-auto p-1">
           {filteredCommands.length > 0 && (
             <>
               {!query.trim() && (
-                <p className="px-3 py-1 text-[10px] text-muted-foreground uppercase tracking-wider">Commands</p>
+                <p className="px-3 py-1 text-[10px] text-muted-foreground uppercase tracking-wider">
+                  Commands
+                </p>
               )}
               {filteredCommands.map(({ cmd }, i) => {
                 const isSelected = i === selectedIndex
@@ -213,7 +252,9 @@ export function CommandPalette() {
           )}
           {filteredNodes.length > 0 && (
             <>
-              <p className="px-3 py-1 text-[10px] text-muted-foreground uppercase tracking-wider">Notes</p>
+              <p className="px-3 py-1 text-[10px] text-muted-foreground uppercase tracking-wider">
+                Notes
+              </p>
               {filteredNodes.map(({ node }, i) => {
                 const globalIdx = filteredCommands.length + i
                 const isSelected = globalIdx === selectedIndex
@@ -221,10 +262,15 @@ export function CommandPalette() {
                   <button
                     key={node.id}
                     className={`w-full flex items-center justify-between px-3 py-2 text-sm rounded ${isSelected ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
-                    onClick={() => { toggleCommandPalette(); selectNode(node.id) }}
+                    onClick={() => {
+                      toggleCommandPalette()
+                      selectNode(node.id)
+                    }}
                   >
                     <span className="truncate">{node.title}</span>
-                    <span className="text-[10px] text-muted-foreground shrink-0 ml-2">{node.content_type}</span>
+                    <span className="text-[10px] text-muted-foreground shrink-0 ml-2">
+                      {node.content_type}
+                    </span>
                   </button>
                 )
               })}

@@ -65,8 +65,15 @@ pub async fn upsert_from_file(
     .fetch_one(pool)
     .await?;
 
-    graph_sync::create_node_with_pg_rollback(graph, pool, id, vault_id, &node.title, &node.content_type)
-        .await?;
+    graph_sync::create_node_with_pg_rollback(
+        graph,
+        pool,
+        id,
+        vault_id,
+        &node.title,
+        &node.content_type,
+    )
+    .await?;
 
     Ok((node, UpsertAction::Created))
 }
@@ -98,7 +105,8 @@ pub async fn sync_file(
         .to_string_lossy()
         .to_string();
 
-    let (node, action) = upsert_from_file(pool, graph, vault_id, file_path, &title, content).await?;
+    let (node, action) =
+        upsert_from_file(pool, graph, vault_id, file_path, &title, content).await?;
 
     Ok(SyncFileResult {
         node: NodeListItem {

@@ -66,7 +66,9 @@ describe('TabBar', () => {
     let switched: string | null = null
     useStore.setState({
       openTabs: [{ id: 'n-1', title: 'Note' }],
-      switchToTab: (id: string) => { switched = id },
+      switchToTab: (id: string) => {
+        switched = id
+      },
     } as any)
     render(<TabBar />)
 
@@ -80,8 +82,12 @@ describe('TabBar', () => {
     let switched: string | null = null
     useStore.setState({
       openTabs: [{ id: 'n-1', title: 'Note' }],
-      closeTab: (id: string) => { closed = id },
-      switchToTab: (id: string) => { switched = id },
+      closeTab: (id: string) => {
+        closed = id
+      },
+      switchToTab: (id: string) => {
+        switched = id
+      },
     } as any)
     render(<TabBar />)
 

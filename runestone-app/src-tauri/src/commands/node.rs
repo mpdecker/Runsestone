@@ -1,8 +1,10 @@
-use crate::router::dispatch;
-use crate::models::node::{CreateNodeRequest, Node, NodeListItem, ScanVaultResult, UpdateNodeRequest};
+use crate::models::node::{
+    CreateNodeRequest, Node, NodeListItem, ScanVaultResult, UpdateNodeRequest,
+};
 use crate::models::vault::Vault;
 use crate::path_guard::canonicalize_path;
 use crate::repositories::node_repo;
+use crate::router::dispatch;
 use crate::services::vault_sync::{self, UpsertAction};
 use crate::state::AppState;
 use std::collections::HashSet;

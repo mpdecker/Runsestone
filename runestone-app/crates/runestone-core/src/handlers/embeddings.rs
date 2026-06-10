@@ -47,13 +47,12 @@ pub async fn process_pending_jobs(ctx: &BackendContext, batch_size: i64) -> Resu
 
     let mut processed = 0u64;
     for (job_id, node_id) in jobs {
-        let row = sqlx::query_as::<_, (String, String)>(
-            "SELECT title, content FROM nodes WHERE id = $1",
-        )
-        .bind(node_id)
-        .fetch_optional(&ctx.pg)
-        .await
-        .map_err(|e| format!("Node lookup failed: {}", e))?;
+        let row =
+            sqlx::query_as::<_, (String, String)>("SELECT title, content FROM nodes WHERE id = $1")
+                .bind(node_id)
+                .fetch_optional(&ctx.pg)
+                .await
+                .map_err(|e| format!("Node lookup failed: {}", e))?;
 
         let Some((title, content)) = row else {
             mark_job_failed(&ctx.pg, job_id, "Node not found").await?;
@@ -89,13 +88,11 @@ pub async fn process_pending_jobs(ctx: &BackendContext, batch_size: i64) -> Resu
 }
 
 async fn mark_job_completed(pool: &sqlx::PgPool, job_id: Uuid) -> Result<(), String> {
-    sqlx::query(
-        "UPDATE embedding_jobs SET status = 'completed', updated_at = NOW() WHERE id = $1",
-    )
-    .bind(job_id)
-    .execute(pool)
-    .await
-    .map_err(|e| e.to_string())?;
+    sqlx::query("UPDATE embedding_jobs SET status = 'completed', updated_at = NOW() WHERE id = $1")
+        .bind(job_id)
+        .execute(pool)
+        .await
+        .map_err(|e| e.to_string())?;
     Ok(())
 }
 
@@ -112,13 +109,11 @@ async fn mark_job_failed(pool: &sqlx::PgPool, job_id: Uuid, error: &str) -> Resu
 }
 
 pub async fn reindex_vault(ctx: &BackendContext, vault_id: Uuid) -> Result<u64, String> {
-    let node_ids = sqlx::query_as::<_, (Uuid,)>(
-        "SELECT id FROM nodes WHERE vault_id = $1",
-    )
-    .bind(vault_id)
-    .fetch_all(&ctx.pg)
-    .await
-    .map_err(|e| format!("Failed to list nodes: {}", e))?;
+    let node_ids = sqlx::query_as::<_, (Uuid,)>("SELECT id FROM nodes WHERE vault_id = $1")
+        .bind(vault_id)
+        .fetch_all(&ctx.pg)
+        .await
+        .map_err(|e| format!("Failed to list nodes: {}", e))?;
 
     let mut count = 0u64;
     for (node_id,) in node_ids {

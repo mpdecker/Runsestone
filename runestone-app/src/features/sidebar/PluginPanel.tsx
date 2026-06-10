@@ -3,8 +3,14 @@ import { useStore } from '@/store'
 
 export function PluginPanel() {
   const {
-    installedPlugins, availablePlugins, pluginDir, pluginLoading,
-    setPluginDir, discoverPlugins, loadPlugin, togglePlugin,
+    installedPlugins,
+    availablePlugins,
+    pluginDir,
+    pluginLoading,
+    setPluginDir,
+    discoverPlugins,
+    loadPlugin,
+    togglePlugin,
   } = useStore()
   const [dirInput, setDirInput] = useState(pluginDir || '')
 
@@ -30,9 +36,7 @@ export function PluginPanel() {
         </button>
       </div>
 
-      {pluginLoading && (
-        <p className="text-[10px] text-muted-foreground">Discovering...</p>
-      )}
+      {pluginLoading && <p className="text-[10px] text-muted-foreground">Discovering...</p>}
 
       {availablePlugins.length > 0 && (
         <div className="space-y-0.5 max-h-32 overflow-y-auto">
@@ -40,8 +44,13 @@ export function PluginPanel() {
           {availablePlugins.map((p) => {
             const installed = installedPlugins.find((i) => i.manifest.name === p.name)
             return (
-              <div key={p.name} className="flex items-center gap-1 text-[10px] p-1 rounded hover:bg-muted">
-                <span className="flex-1 truncate">{p.name} <span className="text-muted-foreground">v{p.version}</span></span>
+              <div
+                key={p.name}
+                className="flex items-center gap-1 text-[10px] p-1 rounded hover:bg-muted"
+              >
+                <span className="flex-1 truncate">
+                  {p.name} <span className="text-muted-foreground">v{p.version}</span>
+                </span>
                 {installed?.error && <span className="text-destructive text-[9px]">Error</span>}
                 {!installed ? (
                   <button

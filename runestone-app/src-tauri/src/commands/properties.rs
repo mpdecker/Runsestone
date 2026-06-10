@@ -1,6 +1,6 @@
 use crate::router::dispatch;
-use runestone_core::models::properties::{PropertiesResponse, SetPropertyRequest};
 use crate::state::AppState;
+use runestone_core::models::properties::{PropertiesResponse, SetPropertyRequest};
 use uuid::Uuid;
 
 #[tauri::command]

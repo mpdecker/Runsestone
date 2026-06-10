@@ -2,9 +2,35 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useStore } from '@/store'
 
 const mockApi = vi.hoisted(() => ({
-  listNodes: vi.fn().mockResolvedValue([{ id: 'n-1', title: 'Note', content_type: 'note', file_path: null, updated_at: null }]),
-  getNode: vi.fn().mockResolvedValue({ id: 'n-1', vault_id: 'v-1', title: 'Note', content: '<p>Hi</p>', content_type: 'note', file_path: null, metadata: {}, word_count: 1, created_at: null, updated_at: null }),
-  createNode: vi.fn().mockResolvedValue({ id: 'n-2', vault_id: 'v-1', title: 'New', content: '', content_type: 'note', file_path: null, metadata: {}, word_count: 0, created_at: null, updated_at: null }),
+  listNodes: vi
+    .fn()
+    .mockResolvedValue([
+      { id: 'n-1', title: 'Note', content_type: 'note', file_path: null, updated_at: null },
+    ]),
+  getNode: vi.fn().mockResolvedValue({
+    id: 'n-1',
+    vault_id: 'v-1',
+    title: 'Note',
+    content: '<p>Hi</p>',
+    content_type: 'note',
+    file_path: null,
+    metadata: {},
+    word_count: 1,
+    created_at: null,
+    updated_at: null,
+  }),
+  createNode: vi.fn().mockResolvedValue({
+    id: 'n-2',
+    vault_id: 'v-1',
+    title: 'New',
+    content: '',
+    content_type: 'note',
+    file_path: null,
+    metadata: {},
+    word_count: 0,
+    created_at: null,
+    updated_at: null,
+  }),
   scanVault: vi.fn().mockResolvedValue({ created: 1, updated: 0, skipped: 0, deleted: 0 }),
   getGraphData: vi.fn().mockResolvedValue({ nodes: [], edges: [] }),
   addTab: vi.fn(),

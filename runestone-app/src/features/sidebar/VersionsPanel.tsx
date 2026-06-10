@@ -21,8 +21,13 @@ export function VersionsPanel() {
       ) : nodeVersions.length > 0 ? (
         <div className="max-h-32 overflow-y-auto space-y-0.5">
           {nodeVersions.map((v) => (
-            <div key={v.id} className="flex items-center gap-1 group px-1 py-0.5 rounded hover:bg-muted">
-              <span className="text-[10px] text-muted-foreground shrink-0 w-6">v{v.version_number}</span>
+            <div
+              key={v.id}
+              className="flex items-center gap-1 group px-1 py-0.5 rounded hover:bg-muted"
+            >
+              <span className="text-[10px] text-muted-foreground shrink-0 w-6">
+                v{v.version_number}
+              </span>
               <span className="text-[10px] text-muted-foreground shrink-0">
                 {v.created_at ? new Date(v.created_at).toLocaleDateString() : 'N/A'}
               </span>

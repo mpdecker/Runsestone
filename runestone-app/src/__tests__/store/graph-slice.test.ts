@@ -2,7 +2,9 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useStore } from '@/store'
 
 const mockApi = vi.hoisted(() => ({
-  getGraphData: vi.fn().mockResolvedValue({ nodes: [{ id: 'n-1', label: 'A', type: 'note' }], edges: [] }),
+  getGraphData: vi
+    .fn()
+    .mockResolvedValue({ nodes: [{ id: 'n-1', label: 'A', type: 'note' }], edges: [] }),
   getLocalGraph: vi.fn().mockResolvedValue({ nodes: [], edges: [] }),
   listNodes: vi.fn().mockResolvedValue([]),
 }))

@@ -1,14 +1,13 @@
 use crate::context::BackendContext;
 use crate::handlers::embeddings;
-use crate::models::node::{CreateNodeRequest, ListNodesRequest, Node, NodeListItem, UpdateNodeRequest};
+use crate::models::node::{
+    CreateNodeRequest, ListNodesRequest, Node, NodeListItem, UpdateNodeRequest,
+};
 use crate::repositories::node_repo;
 use crate::services::graph_sync;
 use uuid::Uuid;
 
-pub async fn create_node(
-    ctx: &BackendContext,
-    request: CreateNodeRequest,
-) -> Result<Node, String> {
+pub async fn create_node(ctx: &BackendContext, request: CreateNodeRequest) -> Result<Node, String> {
     let id = Uuid::new_v4();
     let content_type = request.content_type.unwrap_or_else(|| "note".to_string());
 
@@ -43,10 +42,7 @@ pub async fn create_node(
     Ok(row)
 }
 
-pub async fn update_node(
-    ctx: &BackendContext,
-    request: UpdateNodeRequest,
-) -> Result<Node, String> {
+pub async fn update_node(ctx: &BackendContext, request: UpdateNodeRequest) -> Result<Node, String> {
     let current = node_repo::get_by_id(&ctx.pg, request.id)
         .await
         .map_err(|e| e.to_string())?;
@@ -93,14 +89,9 @@ pub async fn update_node(
     .await
     .map_err(|e| format!("Failed to update node: {}", e))?;
 
-    graph_sync::update_node(
-        &ctx.neo4j,
-        request.id,
-        &row.title,
-        &row.content_type,
-    )
-    .await
-    .map_err(|e| format!("Neo4j update failed: {}", e))?;
+    graph_sync::update_node(&ctx.neo4j, request.id, &row.title, &row.content_type)
+        .await
+        .map_err(|e| format!("Neo4j update failed: {}", e))?;
 
     embeddings::enqueue_embedding(ctx, request.id).await?;
 

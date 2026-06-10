@@ -46,11 +46,7 @@ pub fn get_connection_status(
         ConnectionMode::Remote { api_url, .. } => {
             let has_url = !api_url.is_empty();
             (
-                if has_url {
-                    Some(api_url.clone())
-                } else {
-                    None
-                },
+                if has_url { Some(api_url.clone()) } else { None },
                 has_url && state.remote_connected(),
             )
         }
