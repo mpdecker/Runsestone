@@ -2,15 +2,19 @@ import { useState } from 'react'
 import { useStore } from '@/store'
 import { Button } from '@/components/ui/button'
 
-export function ObsidianImport() {
+interface ObsidianImportProps {
+  show: boolean
+  onClose: () => void
+}
+
+export function ObsidianImport({ show, onClose }: ObsidianImportProps) {
   const { importObsidian, importResult } = useStore()
-  const [showObsidianImport, setShowObsidianImport] = useState(false)
   const [obsidianPath, setObsidianPath] = useState('')
 
+  if (!show) return null
+
   return (
-    <>
-      {showObsidianImport && (
-        <div className="p-2 border-b space-y-1">
+    <div className="p-2 border-b space-y-1">
           <input
             className="w-full px-2 py-1 text-xs border rounded bg-background"
             placeholder="Obsidian vault path..."
@@ -23,14 +27,14 @@ export function ObsidianImport() {
                 if (obsidianPath) {
                   await importObsidian(obsidianPath)
                   setObsidianPath('')
-                  setShowObsidianImport(false)
+                  onClose()
                 }
               }}
             >
               Import
             </Button>
             <Button size="sm" variant="ghost" className="text-xs h-7"
-              onClick={() => setShowObsidianImport(false)}
+              onClick={() => onClose()}
             >
               Cancel
             </Button>
@@ -40,8 +44,6 @@ export function ObsidianImport() {
               Imported {importResult.nodes_created} notes, {importResult.links_created} links from {importResult.files_scanned} files
             </p>
           )}
-        </div>
-      )}
-    </>
+      </div>
   )
 }

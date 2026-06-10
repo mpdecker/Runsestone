@@ -18,7 +18,8 @@ export function buildTree(nodes: { id: string; title: string; content_type: stri
 
   for (const node of itemsWithPath) {
     const parts = (node.file_path! as string).replace(/\\/g, '/').split('/')
-    const fileName = parts[parts.length - 1]
+    const _fileName = parts[parts.length - 1]
+    void _fileName
     const dirParts = parts.slice(0, -1)
 
     let current = root

@@ -89,7 +89,9 @@ describe('App', () => {
   it('renders sidebar and graph canvas', async () => {
     render(<App />)
     await waitForDesktop()
-    expect(screen.getByTestId('graph-canvas')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByTestId('graph-canvas')).toBeInTheDocument()
+    })
   })
 
   it('renders NoteEditor when node selected', async () => {

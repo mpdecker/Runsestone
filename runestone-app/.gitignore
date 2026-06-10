@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Environment (use .env.example as template)
+.env
+.env.local
+.env.*.local
+src-tauri/.env
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

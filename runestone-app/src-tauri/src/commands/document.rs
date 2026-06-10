@@ -3,6 +3,7 @@ use crate::embedding::generate_embedding;
 use crate::llm::extract_from_text;
 use crate::models::extraction::ExtractionNode;
 use crate::models::node::Node;
+use crate::services::graph_sync;
 use crate::state::AppState;
 use uuid::Uuid;
 
@@ -36,15 +37,16 @@ pub async fn import_document(
     .await
     .map_err(|e| format!("Failed to insert document node: {}", e))?;
 
-    let _ = state
-        .neo4j()?
-        .run(
-            neo4rs::query("CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: 'document'})")
-                .param("pg_id", id.to_string())
-                .param("vault_id", vault_id.to_string())
-                .param("title", node.title.clone()),
-        )
-        .await;
+    graph_sync::create_node_with_pg_rollback(
+        state.neo4j()?,
+        state.pg()?,
+        id,
+        vault_id,
+        &node.title,
+        "document",
+    )
+    .await
+    .map_err(|e| e.to_string())?;
 
     let chunks = chunk_text(&text, 1000, 50);
     for (i, chunk) in chunks.iter().enumerate() {
@@ -130,14 +132,18 @@ pub async fn extract_from_document(
             .execute(state.pg()?)
             .await;
 
-            let _ = state.neo4j()?.run(
-                neo4rs::query("MATCH (doc:Node {pg_id: $doc_id}) CREATE (n:Node {pg_id: $pg_id, vault_id: doc.vault_id, title: $title, content_type: 'entity'}) CREATE (n)-[:EXTRACTED_FROM {confidence: $conf, chunk_index: $chunk}]->(doc)")
-                    .param("doc_id", node_id.to_string())
-                    .param("pg_id", id.to_string())
-                    .param("title", entity.name.clone())
-                    .param("conf", confidence)
-                    .param("chunk", *chunk_index),
-            ).await;
+            if let Err(e) = graph_sync::create_extracted_entity(
+                state.neo4j()?,
+                id,
+                node_id,
+                &entity.name,
+                confidence,
+                *chunk_index,
+            )
+            .await
+            {
+                log::warn!("Neo4j entity sync failed: {}", e);
+            }
 
             all_extractions.push(ExtractionNode {
                 name: entity.name.clone(),
@@ -170,14 +176,18 @@ pub async fn extract_from_document(
             .execute(state.pg()?)
             .await;
 
-            let _ = state.neo4j()?.run(
-                neo4rs::query("MATCH (doc:Node {pg_id: $doc_id}) CREATE (n:Node {pg_id: $pg_id, vault_id: doc.vault_id, title: $title, content_type: 'concept'}) CREATE (n)-[:EXTRACTED_FROM {confidence: $conf, chunk_index: $chunk}]->(doc)")
-                    .param("doc_id", node_id.to_string())
-                    .param("pg_id", id.to_string())
-                    .param("title", concept.name.clone())
-                    .param("conf", confidence)
-                    .param("chunk", *chunk_index),
-            ).await;
+            if let Err(e) = graph_sync::create_extracted_concept(
+                state.neo4j()?,
+                id,
+                node_id,
+                &concept.name,
+                confidence,
+                *chunk_index,
+            )
+            .await
+            {
+                log::warn!("Neo4j concept sync failed: {}", e);
+            }
 
             all_extractions.push(ExtractionNode {
                 name: concept.name.clone(),

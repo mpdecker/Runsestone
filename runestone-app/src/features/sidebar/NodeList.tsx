@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 const NODES_PER_PAGE = 50
 
 export function NodeList() {
-  const { nodes, selectedNodeId, selectNode, deleteNode, filterText, filterTypes, selectedTag, splitMode, selectSecondaryNode, secondaryTabId } = useStore()
+  const { nodes, selectedNodeId, selectNode, deleteNode, filterText, filterTypes, splitMode, selectSecondaryNode, secondaryTabId } = useStore()
   const [nodePage, setNodePage] = useState(0)
 
   const filteredNodes = nodes.filter((n) => {

@@ -13,7 +13,6 @@ export function NodeActions() {
     suggestTags, tagSuggestions,
     backlinks, selectNode,
     nodeTags, addTags, removeTag, acceptSuggestedTags,
-    selectedVaultId,
   } = useStore()
 
   const [tagInput, setTagInput] = useState('')

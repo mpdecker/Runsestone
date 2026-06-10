@@ -11,8 +11,23 @@ import { createTagSlice, type TagSlice } from './tag-slice'
 import { createPropertiesSlice, type PropertiesSlice } from './properties-slice'
 import { createTabSlice, type TabSlice } from './tab-slice'
 import { createPluginSlice, type PluginSlice } from './plugin-slice'
+import { createClipperSlice, type ClipperSlice } from './clipper-slice'
+import { createVersionsSlice, type VersionsSlice } from './versions-slice'
 
-export type AppStore = VaultSlice & NodeSlice & GraphSlice & SearchSlice & ExtractionSlice & AISlice & UISlice & ObsidianSlice & TagSlice & PropertiesSlice & TabSlice & PluginSlice
+export type AppStore = VaultSlice &
+  NodeSlice &
+  GraphSlice &
+  SearchSlice &
+  ExtractionSlice &
+  AISlice &
+  UISlice &
+  ObsidianSlice &
+  TagSlice &
+  PropertiesSlice &
+  TabSlice &
+  PluginSlice &
+  ClipperSlice &
+  VersionsSlice
 
 export const useStore = create<AppStore>()((...args) => ({
   ...createVaultSlice(...args),
@@ -27,4 +42,6 @@ export const useStore = create<AppStore>()((...args) => ({
   ...createPropertiesSlice(...args),
   ...createTabSlice(...args),
   ...createPluginSlice(...args),
+  ...createClipperSlice(...args),
+  ...createVersionsSlice(...args),
 }))

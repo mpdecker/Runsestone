@@ -1,4 +1,4 @@
-use crate::db::{create_neo4j_graph, create_pg_pool};
+use crate::db::{create_neo4j_graph, create_pg_pool, run_neo4j_init, run_pg_migrations};
 use crate::embedding::EmbeddingConfig;
 use crate::llm::LlmConfig;
 use serde::{Deserialize, Serialize};
@@ -36,9 +36,9 @@ impl AppState {
         }
 
         let database_url = std::env::var("DATABASE_URL")
-            .unwrap_or_else(|_| "postgres://runestone:runestone@localhost:5432/runestone".to_string());
+            .unwrap_or_else(|_| "postgres://runestone:runestone@localhost:5442/runestone".to_string());
         let neo4j_uri = std::env::var("NEO4J_URL")
-            .unwrap_or_else(|_| "bolt://localhost:7687".to_string());
+            .unwrap_or_else(|_| "bolt://localhost:7688".to_string());
         let neo4j_user = std::env::var("NEO4J_USER")
             .unwrap_or_else(|_| "neo4j".to_string());
         let neo4j_password = std::env::var("NEO4J_PASSWORD")
@@ -61,6 +61,12 @@ impl AppState {
 
             match (pg_result, neo4j_result) {
                 (Ok(pg), Ok(neo4j)) => {
+                    if let Err(e) = tauri::async_runtime::block_on(run_pg_migrations(&pg)) {
+                        log::warn!("PostgreSQL migration failed: {}", e);
+                    }
+                    if let Err(e) = tauri::async_runtime::block_on(run_neo4j_init(&neo4j)) {
+                        log::warn!("Neo4j initialization failed: {}", e);
+                    }
                     log::info!("Local database connections established");
                     (Some(pg), Some(neo4j), ConnectionMode::Local)
                 }
@@ -107,6 +113,7 @@ impl AppState {
         self.pg.is_some()
     }
 
+    #[allow(dead_code)]
     pub fn has_neo4j(&self) -> bool {
         self.neo4j.is_some()
     }

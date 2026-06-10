@@ -1,6 +1,8 @@
 use crate::state::AppState;
 use serde_json::Value;
 
+/// HTTP bridge for future remote mode. Not yet wired into commands — see docs/remote-mode.md.
+#[allow(dead_code)]
 pub async fn remote_request(
     state: &tauri::State<'_, AppState>,
     method: &str,

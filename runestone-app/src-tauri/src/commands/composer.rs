@@ -1,4 +1,6 @@
 use crate::models::node::Node;
+use crate::repositories::node_repo;
+use crate::services::graph_sync;
 use crate::state::AppState;
 use uuid::Uuid;
 
@@ -8,23 +10,18 @@ pub async fn merge_nodes(
     source_id: Uuid,
     target_id: Uuid,
 ) -> Result<Node, String> {
-    let source = sqlx::query_as::<_, Node>(
-        "SELECT id, vault_id, title, content, content_type, file_path, metadata, word_count, created_at, updated_at FROM nodes WHERE id = $1",
-    )
-    .bind(source_id)
-    .fetch_one(state.pg()?)
-    .await
-    .map_err(|e| format!("Source node not found: {}", e))?;
+    let source = node_repo::get_by_id(state.pg()?, source_id)
+        .await
+        .map_err(|e| e.to_string())?;
 
-    let mut target = sqlx::query_as::<_, Node>(
-        "SELECT id, vault_id, title, content, content_type, file_path, metadata, word_count, created_at, updated_at FROM nodes WHERE id = $1",
-    )
-    .bind(target_id)
-    .fetch_one(state.pg()?)
-    .await
-    .map_err(|e| format!("Target node not found: {}", e))?;
+    let target = node_repo::get_by_id(state.pg()?, target_id)
+        .await
+        .map_err(|e| e.to_string())?;
 
-    let merged_content = format!("{}\n\n<hr>\n<h2>{}</h2>\n{}", target.content, source.title, source.content);
+    let merged_content = format!(
+        "{}\n\n<hr>\n<h2>{}</h2>\n{}",
+        target.content, source.title, source.content
+    );
     let word_count = merged_content.split_whitespace().count() as i32;
 
     let updated = sqlx::query_as::<_, Node>(
@@ -37,14 +34,13 @@ pub async fn merge_nodes(
     .await
     .map_err(|e| format!("Failed to merge: {}", e))?;
 
-    sqlx::query("DELETE FROM nodes WHERE id = $1")
-        .bind(source_id)
-        .execute(state.pg()?)
+    graph_sync::delete_node_before_pg(state.neo4j()?, source_id)
         .await
-        .map_err(|e| format!("Failed to delete source: {}", e))?;
+        .map_err(|e| format!("Neo4j delete failed during merge: {}", e))?;
 
-    let _ = state.neo4j()?.run(neo4rs::query("MATCH (n:Node {pg_id: $pg_id}) DETACH DELETE n")
-        .param("pg_id", source_id.to_string())).await;
+    node_repo::delete_by_id(state.pg()?, source_id)
+        .await
+        .map_err(|e| e.to_string())?;
 
     Ok(updated)
 }
@@ -55,13 +51,9 @@ pub async fn split_node(
     node_id: Uuid,
     new_title: String,
 ) -> Result<(Node, Node), String> {
-    let source = sqlx::query_as::<_, Node>(
-        "SELECT id, vault_id, title, content, content_type, file_path, metadata, word_count, created_at, updated_at FROM nodes WHERE id = $1",
-    )
-    .bind(node_id)
-    .fetch_one(state.pg()?)
-    .await
-    .map_err(|e| format!("Node not found: {}", e))?;
+    let source = node_repo::get_by_id(state.pg()?, node_id)
+        .await
+        .map_err(|e| e.to_string())?;
 
     let split_point = source.content.len() / 2;
     let first_content = source.content[..split_point].to_string();
@@ -93,14 +85,20 @@ pub async fn split_node(
     .await
     .map_err(|e| format!("Failed to create split node: {}", e))?;
 
-    let _ = state.neo4j()?.run(neo4rs::query("CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: 'note'})")
-        .param("pg_id", new_id.to_string())
-        .param("vault_id", source.vault_id.to_string())
-        .param("title", second.title.clone())).await;
+    graph_sync::create_node_with_pg_rollback(
+        state.neo4j()?,
+        state.pg()?,
+        new_id,
+        source.vault_id,
+        &second.title,
+        &second.content_type,
+    )
+    .await
+    .map_err(|e| e.to_string())?;
 
-    let _ = state.neo4j()?.run(neo4rs::query("MATCH (a:Node {pg_id: $a}), (b:Node {pg_id: $b}) CREATE (a)-[:RELATES_TO]->(b)")
-        .param("a", node_id.to_string())
-        .param("b", new_id.to_string())).await;
+    graph_sync::create_relates_to(state.neo4j()?, node_id, new_id)
+        .await
+        .map_err(|e| format!("Neo4j relation failed: {}", e))?;
 
     Ok((first, second))
 }

@@ -83,8 +83,10 @@ export const WikiLink = Node.create<WikiLinkOptions>({
     return {
       insertWikiLink:
         (title: string) =>
-        ({ editor, commands }) => {
-          const nodes = editor.state.doc.descendants((node) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ({ editor, commands }: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const nodes = editor.state.doc.descendants((node: any) => {
             if (node.type.name === this.name) {
               return node
             }

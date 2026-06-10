@@ -1,4 +1,5 @@
-use crate::models::node::{CreateNodeRequest, Node, NodeListItem};
+use crate::models::node::{Node, NodeListItem};
+use crate::services::graph_sync;
 use crate::state::AppState;
 use uuid::Uuid;
 
@@ -40,15 +41,16 @@ pub async fn create_daily_note(
     .await
     .map_err(|e| format!("Failed to create daily note: {}", e))?;
 
-    let _ = state
-        .neo4j()?
-        .run(
-            neo4rs::query("CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: 'note'})")
-                .param("pg_id", id.to_string())
-                .param("vault_id", vault_id.to_string())
-                .param("title", row.title.clone()),
-        )
-        .await;
+    graph_sync::create_node_with_pg_rollback(
+        state.neo4j()?,
+        state.pg()?,
+        id,
+        vault_id,
+        &row.title,
+        &row.content_type,
+    )
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(row)
 }
@@ -115,15 +117,16 @@ pub async fn create_node_from_template(
     .await
     .map_err(|e| format!("Failed to create node from template: {}", e))?;
 
-    let _ = state
-        .neo4j()?
-        .run(
-            neo4rs::query("CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: 'note'})")
-                .param("pg_id", id.to_string())
-                .param("vault_id", template.vault_id.to_string())
-                .param("title", row.title.clone()),
-        )
-        .await;
+    graph_sync::create_node_with_pg_rollback(
+        state.neo4j()?,
+        state.pg()?,
+        id,
+        template.vault_id,
+        &row.title,
+        &row.content_type,
+    )
+    .await
+    .map_err(|e| e.to_string())?;
 
     Ok(row)
 }

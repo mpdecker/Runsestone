@@ -2,7 +2,7 @@ import { useStore } from '@/store'
 import { Button } from '@/components/ui/button'
 
 export function TagPane() {
-  const { vaultTags, selectedTag, selectTag, selectedVaultId, loadVaultTags } = useStore()
+  const { vaultTags, selectedTag, selectTag, selectedVaultId } = useStore()
 
   if (!selectedVaultId) return null
 

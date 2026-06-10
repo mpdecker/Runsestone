@@ -5,11 +5,12 @@ import { Suggestion } from '@tiptap/suggestion'
 import CodeBlockLowlight from '@tiptap/extension-code-block-lowlight'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
-import Table from '@tiptap/extension-table'
-import TableRow from '@tiptap/extension-table-row'
-import TableCell from '@tiptap/extension-table-cell'
-import TableHeader from '@tiptap/extension-table-header'
+import { Table } from '@tiptap/extension-table'
+import { TableRow } from '@tiptap/extension-table-row'
+import { TableCell } from '@tiptap/extension-table-cell'
+import { TableHeader } from '@tiptap/extension-table-header'
 import { common, createLowlight } from 'lowlight'
+import { useShallow } from 'zustand/react/shallow'
 import { useStore } from '@/store'
 import { Button } from '@/components/ui/button'
 import { WikiLink } from './WikiLinkExtension'
@@ -37,13 +38,39 @@ interface Props {
 }
 
 export function NoteEditor({ secondary = false }: Props) {
-  const store = useStore()
-  const currentNode = secondary ? store.secondaryNode : store.currentNode
-  const selectedNodeId = secondary ? store.secondaryTabId : store.selectedNodeId
   const {
-    updateNodeContent, saveNode, isEditorDirty, nodes, selectNode,
-    readingMode, toggleReadingMode,
-  } = store
+    currentNode,
+    secondaryNode,
+    selectedNodeId,
+    secondaryTabId,
+    updateNodeContent,
+    saveNode,
+    isEditorDirty,
+    isSaving,
+    nodes,
+    selectNode,
+    readingMode,
+    toggleReadingMode,
+    fetchWikiLinkPreview,
+  } = useStore(
+    useShallow((s) => ({
+      currentNode: secondary ? s.secondaryNode : s.currentNode,
+      secondaryNode: s.secondaryNode,
+      selectedNodeId: s.selectedNodeId,
+      secondaryTabId: s.secondaryTabId,
+      updateNodeContent: s.updateNodeContent,
+      saveNode: s.saveNode,
+      isEditorDirty: s.isEditorDirty,
+      isSaving: s.isSaving,
+      nodes: s.nodes,
+      selectNode: s.selectNode,
+      readingMode: s.readingMode,
+      toggleReadingMode: s.toggleReadingMode,
+      fetchWikiLinkPreview: s.fetchWikiLinkPreview,
+    })),
+  )
+  const activeNode = secondary ? secondaryNode : currentNode
+  const activeNodeId = secondary ? secondaryTabId : selectedNodeId
   const saveTimerRef = useRef<number | null>(null)
   const [preview, setPreview] = useState<PreviewState>({ visible: false, x: 0, y: 0, node: null, snippet: null })
   const previewTimerRef = useRef<number | null>(null)
@@ -89,7 +116,7 @@ export function NoteEditor({ secondary = false }: Props) {
         },
       }),
     ],
-    content: currentNode?.content || '',
+    content: activeNode?.content || '',
     onUpdate: ({ editor }) => {
       const html = editor.getHTML()
       updateNodeContent(html)
@@ -104,13 +131,13 @@ export function NoteEditor({ secondary = false }: Props) {
   })
 
   useEffect(() => {
-    if (editor && currentNode) {
+    if (editor && activeNode) {
       const currentContent = editor.getHTML()
-      if (currentContent !== currentNode.content) {
-        editor.commands.setContent(currentNode.content || '')
+      if (currentContent !== activeNode.content) {
+        editor.commands.setContent(activeNode.content || '')
       }
     }
-  }, [currentNode?.id])
+  }, [activeNode?.id])
 
   useEffect(() => {
     return () => {
@@ -186,18 +213,7 @@ export function NoteEditor({ secondary = false }: Props) {
           if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
           previewTimerRef.current = window.setTimeout(async () => {
             const rect = linkEl.getBoundingClientRect()
-            let snippet: string | null = null
-            try {
-              const { getNode } = await import('@/lib/api')
-              const fullNode = await getNode(matched.id)
-              snippet = fullNode.content
-                .replace(/<[^>]+>/g, '')
-                .replace(/\s+/g, ' ')
-                .trim()
-                .slice(0, 250)
-            } catch {
-              // snippet load failed
-            }
+            const snippet = await fetchWikiLinkPreview(matched.id)
             setPreview({
               visible: true,
               x: rect.left,
@@ -212,14 +228,14 @@ export function NoteEditor({ secondary = false }: Props) {
       if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
       setPreview((p) => (p.visible ? { ...p, visible: false } : p))
     }
-  }, [nodes])
+  }, [nodes, fetchWikiLinkPreview])
 
   const handleMouseLeave = useCallback(() => {
     if (previewTimerRef.current) clearTimeout(previewTimerRef.current)
     setPreview((p) => (p.visible ? { ...p, visible: false } : p))
   }, [])
 
-  if (!selectedNodeId || !currentNode) {
+  if (!activeNodeId || !activeNode) {
     return null
   }
 
@@ -227,14 +243,17 @@ export function NoteEditor({ secondary = false }: Props) {
     <div className="h-full flex flex-col min-h-0">
       <div className="border-b px-3 py-2 flex items-center justify-between bg-card shrink-0">
         <div className="flex items-center gap-2 min-w-0">
-          <h1 className="font-semibold text-sm truncate">{currentNode.title}</h1>
+          <h1 className="font-semibold text-sm truncate">{activeNode.title}</h1>
           {isEditorDirty && (
             <span className="text-xs text-muted-foreground shrink-0">(unsaved)</span>
+          )}
+          {isSaving && (
+            <span className="text-xs text-muted-foreground shrink-0">Saving...</span>
           )}
         </div>
         <div className="flex items-center gap-2 text-xs text-muted-foreground shrink-0">
           <AudioRecorder editor={editor} />
-          <span>{currentNode.word_count} words</span>
+          <span>{activeNode.word_count} words</span>
           <Button variant="ghost" size="sm" onClick={toggleReadingMode} className="h-6 text-xs px-1">
             {readingMode ? 'Edit' : 'Read'}
           </Button>

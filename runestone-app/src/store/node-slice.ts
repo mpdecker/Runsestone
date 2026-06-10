@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { Node, NodeListItem } from '../lib/types'
+import type { AppStore } from './index'
 import * as api from '../lib/api'
 
 export interface NodeSlice {
@@ -8,6 +9,8 @@ export interface NodeSlice {
   currentNode: Node | null
   secondaryNode: Node | null
   isEditorDirty: boolean
+  isSaving: boolean
+  wikiLinkPreviews: Record<string, string>
   loadNodes: () => Promise<void>
   loadNodesByTag: (tag: string) => Promise<void>
   scanVault: () => Promise<void>
@@ -17,15 +20,17 @@ export interface NodeSlice {
   updateNodeContent: (content: string) => void
   saveNode: () => Promise<void>
   deleteNode: (id: string) => Promise<void>
+  fetchWikiLinkPreview: (nodeId: string) => Promise<string | null>
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createNodeSlice: StateCreator<any, [], [], NodeSlice> = (set, get) => ({
+export const createNodeSlice: StateCreator<AppStore, [], [], NodeSlice> = (set, get) => ({
   nodes: [],
   selectedNodeId: null,
   currentNode: null,
   secondaryNode: null,
   isEditorDirty: false,
+  isSaving: false,
+  wikiLinkPreviews: {},
 
   loadNodes: async () => {
     const { selectedVaultId } = get()
@@ -72,6 +77,7 @@ export const createNodeSlice: StateCreator<any, [], [], NodeSlice> = (set, get) 
       get().addTab?.(nodeId, node.title)
       get().loadNodeTags?.(nodeId)
       get().loadNodeProperties?.(nodeId)
+      get().loadNodeVersions?.(nodeId)
     } catch (e) {
       set({ error: `Failed to load node: ${e}`, isLoading: false })
     }
@@ -114,15 +120,15 @@ export const createNodeSlice: StateCreator<any, [], [], NodeSlice> = (set, get) 
   saveNode: async () => {
     const { currentNode } = get()
     if (!currentNode) return
-    set({ isLoading: true, error: null })
+    set({ isSaving: true, error: null })
     try {
       const updated = await api.updateNode({
         id: currentNode.id,
         content: currentNode.content,
       })
-      set({ currentNode: updated, isLoading: false, isEditorDirty: false })
+      set({ currentNode: updated, isSaving: false, isEditorDirty: false })
     } catch (e) {
-      set({ error: `Failed to save node: ${e}`, isLoading: false })
+      set({ error: `Failed to save node: ${e}`, isSaving: false })
     }
   },
 
@@ -135,6 +141,25 @@ export const createNodeSlice: StateCreator<any, [], [], NodeSlice> = (set, get) 
       await get().loadGraphData()
     } catch (e) {
       set({ error: `Failed to delete node: ${e}`, isLoading: false })
+    }
+  },
+
+  fetchWikiLinkPreview: async (nodeId: string) => {
+    const cached = get().wikiLinkPreviews[nodeId]
+    if (cached) return cached
+    try {
+      const fullNode = await api.getNode(nodeId)
+      const snippet = fullNode.content
+        .replace(/<[^>]+>/g, '')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 250)
+      set({
+        wikiLinkPreviews: { ...get().wikiLinkPreviews, [nodeId]: snippet },
+      })
+      return snippet
+    } catch {
+      return null
     }
   },
 })
