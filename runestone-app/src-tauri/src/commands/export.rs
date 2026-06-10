@@ -1,10 +1,9 @@
 use crate::models::node::Node;
+use crate::path_guard::ensure_within_root;
 use crate::state::AppState;
 use uuid::Uuid;
 
-fn html_to_markdown(html: &str) -> String {
-    let mut md = String::new();
-
+pub fn html_to_markdown(html: &str) -> String {
     let tags = [
         ("<h1>", "# "), ("</h1>", "\n"),
         ("<h2>", "## "), ("</h2>", "\n"),
@@ -51,10 +50,10 @@ fn html_to_markdown(html: &str) -> String {
     let re_newlines = regex::Regex::new(r"\n{3,}").unwrap();
     s = re_newlines.replace_all(&s, "\n\n").to_string();
 
-    md = s.trim().to_string();
-    md.push('\n');
+    let mut result = s.trim().to_string();
+    result.push('\n');
 
-    md
+    result
 }
 
 #[tauri::command]
@@ -93,13 +92,33 @@ pub async fn export_node_to_markdown(
 
     let full_content = format!("{}{}", frontmatter, md_content);
 
-    let path = export_path.unwrap_or_else(|| format!("{}.md", node.title));
-    let path = if path.ends_with(".md") { path } else { format!("{}.md", path) };
+    let vault_root = sqlx::query_as::<_, (String,)>("SELECT root_path FROM vaults WHERE id = $1")
+        .bind(node.vault_id)
+        .fetch_one(state.pg()?)
+        .await
+        .map_err(|e| format!("Vault not found: {}", e))?
+        .0;
 
-    std::fs::write(&path, &full_content)
+    let default_name = format!("{}.md", node.title);
+    let path = export_path.unwrap_or(default_name);
+    let path = if path.ends_with(".md") {
+        path
+    } else {
+        format!("{}.md", path)
+    };
+
+    let full_path = if std::path::Path::new(&path).is_absolute() {
+        path
+    } else {
+        format!("{}/{}", vault_root.trim_end_matches('/').trim_end_matches('\\'), path)
+    };
+
+    let safe_path = ensure_within_root(&vault_root, &full_path).map_err(|e| e.to_string())?;
+
+    std::fs::write(&safe_path, &full_content)
         .map_err(|e| format!("Failed to write file: {}", e))?;
 
-    Ok(path)
+    Ok(safe_path.to_string_lossy().to_string())
 }
 
 #[tauri::command]
@@ -152,4 +171,22 @@ pub async fn export_vault_to_markdown(
     }
 
     Ok(exported)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn html_to_markdown_converts_headings() {
+        let md = html_to_markdown("<h1>Title</h1><p>Body</p>");
+        assert!(md.contains("# Title"));
+        assert!(md.contains("Body"));
+    }
+
+    #[test]
+    fn html_to_markdown_strips_remaining_tags() {
+        let md = html_to_markdown("<span>hello</span>");
+        assert_eq!(md.trim(), "hello");
+    }
 }

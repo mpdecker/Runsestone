@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { Vault } from '../lib/types'
+import type { AppStore } from './index'
 import * as api from '../lib/api'
 
 export interface VaultSlice {
@@ -13,8 +14,7 @@ export interface VaultSlice {
   initDb: () => Promise<void>
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createVaultSlice: StateCreator<any, [], [], VaultSlice> = (set, get) => ({
+export const createVaultSlice: StateCreator<AppStore, [], [], VaultSlice> = (set, get) => ({
   vaults: [],
   selectedVaultId: null,
   isLoading: false,

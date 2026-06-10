@@ -1,13 +1,33 @@
+use crate::services::graph_sync;
 use crate::state::AppState;
+use crate::util::html_escape;
 use std::io::{BufRead, BufReader, Read, Write};
 use std::net::TcpListener;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
 static SERVER_PORT: Mutex<Option<u16>> = Mutex::const_new(None);
 static SERVER_RUNNING: AtomicBool = AtomicBool::new(false);
+
+fn clipper_auth_token() -> String {
+    std::env::var("CLIPPER_AUTH_TOKEN").unwrap_or_else(|_| "runestone-clipper-dev".to_string())
+}
+
+fn request_has_valid_token(headers: &str) -> bool {
+    let expected = clipper_auth_token();
+    headers
+        .lines()
+        .any(|line| {
+            line.to_lowercase().starts_with("x-clipper-token:")
+                && line[16..].trim() == expected
+        })
+}
+
+#[tauri::command]
+pub async fn get_clipper_auth_token() -> Result<String, String> {
+    Ok(clipper_auth_token())
+}
 
 #[tauri::command]
 pub async fn start_clipper_server(
@@ -17,7 +37,7 @@ pub async fn start_clipper_server(
 ) -> Result<u16, String> {
     let mut current = SERVER_PORT.lock().await;
     if current.is_some() {
-        return Err("Clipper server already running. Port: {}".to_string());
+        return Err("Clipper server already running".to_string());
     }
 
     let port = port.unwrap_or(9876);
@@ -35,40 +55,63 @@ pub async fn start_clipper_server(
 
     std::thread::spawn(move || {
         for stream in listener.incoming() {
-            if !SERVER_RUNNING.load(Ordering::SeqCst) { break; }
+            if !SERVER_RUNNING.load(Ordering::SeqCst) {
+                break;
+            }
 
             if let Ok(mut stream) = stream {
                 let _ = stream.set_read_timeout(Some(std::time::Duration::from_secs(5)));
                 let mut reader = BufReader::new(stream.try_clone().unwrap());
                 let mut request_line = String::new();
-                if reader.read_line(&mut request_line).is_err() { continue; }
+                if reader.read_line(&mut request_line).is_err() {
+                    continue;
+                }
 
+                let mut headers = String::new();
                 let mut content_length = 0usize;
                 loop {
                     let mut line = String::new();
-                    if reader.read_line(&mut line).is_err() { break; }
-                    if line.trim().is_empty() { break; }
+                    if reader.read_line(&mut line).is_err() {
+                        break;
+                    }
+                    if line.trim().is_empty() {
+                        break;
+                    }
+                    headers.push_str(&line);
                     if line.to_lowercase().starts_with("content-length:") {
                         content_length = line[15..].trim().parse().unwrap_or(0);
                     }
+                }
+
+                if request_line.starts_with("OPTIONS") {
+                    let _ = stream.write_all(
+                        b"HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://localhost\r\nAccess-Control-Allow-Methods: POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type, X-Clipper-Token\r\nContent-Length: 0\r\n\r\n",
+                    );
+                    continue;
+                }
+
+                if request_line.starts_with("GET /health") {
+                    if !request_has_valid_token(&headers) {
+                        let _ = stream.write_all(b"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n");
+                        continue;
+                    }
+                    let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://localhost\r\nContent-Type: application/json\r\nContent-Length: 20\r\n\r\n{\"status\":\"running\"}");
+                    continue;
+                }
+
+                if !request_line.starts_with("POST /clip") {
+                    continue;
+                }
+
+                if !request_has_valid_token(&headers) {
+                    let _ = stream.write_all(b"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n");
+                    continue;
                 }
 
                 let mut body = vec![0u8; content_length];
                 if content_length > 0 {
                     let _ = reader.read_exact(&mut body);
                 }
-
-                if request_line.starts_with("OPTIONS") {
-                    let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nAccess-Control-Allow-Methods: POST, OPTIONS\r\nAccess-Control-Allow-Headers: Content-Type\r\nContent-Length: 0\r\n\r\n");
-                    continue;
-                }
-
-                if request_line.starts_with("GET /health") {
-                    let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: application/json\r\nContent-Length: 20\r\n\r\n{\"status\":\"running\"}");
-                    continue;
-                }
-
-                if !request_line.starts_with("POST /clip") { continue; }
 
                 let body_str = String::from_utf8_lossy(&body);
                 let clip: serde_json::Value = match serde_json::from_str(&body_str) {
@@ -83,9 +126,11 @@ pub async fn start_clipper_server(
                 let url = clip["url"].as_str().unwrap_or("").to_string();
                 let content = clip["content"].as_str().unwrap_or("").to_string();
 
+                let safe_url = html_escape(&url);
+                let safe_content = html_escape(&content);
                 let formatted = format!(
                     "<p><a href=\"{}\">Source: {}</a></p><hr>{}",
-                    url, url, content
+                    safe_url, safe_url, safe_content
                 );
 
                 let pg_clone = pg.clone();
@@ -99,7 +144,7 @@ pub async fn start_clipper_server(
 
                 let result = handle.block_on(async move {
                     sqlx::query(
-                        "INSERT INTO nodes (id, vault_id, title, content, content_type, word_count) VALUES ($1, $2, $3, $4, 'note', $5)"
+                        "INSERT INTO nodes (id, vault_id, title, content, content_type, word_count) VALUES ($1, $2, $3, $4, 'note', $5)",
                     )
                     .bind(fid)
                     .bind(vault_id)
@@ -112,22 +157,33 @@ pub async fn start_clipper_server(
 
                 match result {
                     Ok(_) => {
-                        let n4j = neo4j_clone;
-                        let response = format!("HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: application/json\r\nContent-Length: 30\r\n\r\n{{\"status\":\"ok\",\"id\":\"{}\"}}", id);
+                        let response = format!(
+                            "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://localhost\r\nContent-Type: application/json\r\nContent-Length: 30\r\n\r\n{{\"status\":\"ok\",\"id\":\"{}\"}}",
+                            id
+                        );
                         let _ = stream.write_all(response.as_bytes());
                         if let Ok(handle) = tokio::runtime::Handle::try_current() {
+                            let n4j = neo4j_clone;
                             handle.spawn(async move {
-                                let _ = n4j.run(neo4rs::query(
-                                    "CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: 'note'})"
+                                if let Err(e) = graph_sync::create_node(
+                                    &n4j,
+                                    id,
+                                    vault_id,
+                                    &title,
+                                    "note",
                                 )
-                                .param("pg_id", id.to_string())
-                                .param("vault_id", vault_id.to_string())
-                                .param("title", title)).await;
+                                .await
+                                {
+                                    log::warn!("Clipper Neo4j sync failed: {}", e);
+                                }
                             });
                         }
                     }
                     Err(e) => {
-                        let response = format!("HTTP/1.1 500 Internal Server Error\r\n\r\n{{\"error\":\"{}\"}}", e);
+                        let response = format!(
+                            "HTTP/1.1 500 Internal Server Error\r\n\r\n{{\"error\":\"{}\"}}",
+                            e
+                        );
                         let _ = stream.write_all(response.as_bytes());
                     }
                 }

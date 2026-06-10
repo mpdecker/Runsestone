@@ -81,7 +81,6 @@ export function createWikiLinkSuggestion(
           el.style.zIndex = '50'
           document.body.appendChild(el)
 
-          const renderRoot = (el as unknown as { render: (node: React.ReactElement) => void })
           if (component.element) {
             while (el.firstChild) el.removeChild(el.firstChild)
             el.appendChild(component.element)

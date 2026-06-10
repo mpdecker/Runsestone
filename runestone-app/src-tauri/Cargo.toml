@@ -13,7 +13,7 @@ name = "app_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
-tauri-build = { version = "2.6.0" }
+tauri-build = { version = "2.6.0", features = [] }
 
 [dependencies]
 tauri = { version = "2.11.0", features = [] }
@@ -36,3 +36,4 @@ reqwest = { version = "0.12", features = ["json"] }
 pgvector = { version = "0.4", features = ["sqlx"] }
 lopdf = "0.34"
 text-splitter = "0.18"
+thiserror = "2"

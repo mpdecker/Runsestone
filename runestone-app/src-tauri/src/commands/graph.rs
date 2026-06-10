@@ -184,14 +184,9 @@ pub async fn parse_wiki_links(
         .map_err(|e| format!("Failed to insert wiki link: {}", e))?;
 
         if let Some(rid) = resolved_id {
-            let _ = state
-                .neo4j()?
-                .run(
-                    neo4rs::query("MATCH (a:Node {pg_id: $a_id}), (b:Node {pg_id: $b_id}) CREATE (a)-[:LINKS_TO {context: 'wiki-link'}]->(b)")
-                        .param("a_id", node_id.to_string())
-                        .param("b_id", rid.to_string()),
-                )
-                .await;
+            crate::services::graph_sync::create_wiki_link(state.neo4j()?, node_id, rid)
+                .await
+                .map_err(|e| format!("Neo4j wiki link failed: {}", e))?;
         }
 
         created_links.push(link);

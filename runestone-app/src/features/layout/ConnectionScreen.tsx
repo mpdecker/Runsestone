@@ -46,7 +46,7 @@ export function ConnectionScreen({ onConnected }: ConnectionScreenProps) {
           </div>
           <h1 className="text-xl font-semibold">Connect to Runestone</h1>
           <p className="text-sm text-muted-foreground text-center">
-            Enter the URL of your Runestone server to get started.
+            Enter the URL of your Runestone server to get started. Remote mode is preview-only until a server is deployed — see docs/remote-mode.md.
           </p>
         </div>
 

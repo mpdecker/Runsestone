@@ -136,7 +136,9 @@ pub async fn hybrid_search(
     })
 }
 
-fn parse_boolean_query(raw: &str) -> String {
+const MAX_REGEX_PATTERN_LEN: usize = 200;
+
+pub fn parse_boolean_query(raw: &str) -> String {
     let processed = raw
         .replace(" AND ", " & ")
         .replace(" and ", " & ")
@@ -184,8 +186,22 @@ pub async fn regex_search(
     case_sensitive: Option<bool>,
     limit: Option<i64>,
 ) -> Result<Vec<SearchResult>, String> {
+    if pattern.len() > MAX_REGEX_PATTERN_LEN {
+        return Err(format!(
+            "Regex pattern exceeds maximum length of {} characters",
+            MAX_REGEX_PATTERN_LEN
+        ));
+    }
+    if regex::RegexBuilder::new(&pattern)
+        .case_insensitive(!case_sensitive.unwrap_or(false))
+        .build()
+        .is_err()
+    {
+        return Err("Invalid regex pattern".to_string());
+    }
+
     let case = case_sensitive.unwrap_or(false);
-    let limit = limit.unwrap_or(20);
+    let limit = limit.unwrap_or(20).min(100);
 
     let results = if case {
         sqlx::query_as::<_, SearchResult>(
@@ -310,4 +326,20 @@ pub async fn remove_alias(
         .map_err(|e| format!("Failed to remove alias: {}", e))?;
 
     Ok(meta["aliases"].clone())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_boolean_query_replaces_operators() {
+        assert_eq!(parse_boolean_query("foo AND bar"), "foo & bar");
+        assert_eq!(parse_boolean_query("foo OR bar NOT baz"), "foo | bar !baz");
+    }
+
+    #[test]
+    fn regex_pattern_length_constant() {
+        assert_eq!(MAX_REGEX_PATTERN_LEN, 200);
+    }
 }

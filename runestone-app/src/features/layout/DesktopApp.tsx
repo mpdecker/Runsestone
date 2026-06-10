@@ -1,29 +1,84 @@
-import { useEffect } from 'react'
+import { lazy, Suspense, useEffect } from 'react'
+import { useShallow } from 'zustand/react/shallow'
 import { Sidebar } from '@/features/sidebar'
 import { NoteEditor } from '@/features/editor'
-import { GraphCanvas } from '@/features/graph'
 import { SearchPanel } from '@/features/search'
-import { ExtractionReview } from '@/features/extraction'
-import { CommandPalette } from '@/features/command-palette'
-import { ChatPanel } from '@/features/chat'
 import { TabBar } from '@/features/editor/TabBar'
 import { useStore } from '@/store'
 
+const GraphCanvas = lazy(() =>
+  import('@/features/graph').then((m) => ({ default: m.GraphCanvas })),
+)
+const ExtractionReview = lazy(() =>
+  import('@/features/extraction').then((m) => ({ default: m.ExtractionReview })),
+)
+const CommandPalette = lazy(() =>
+  import('@/features/command-palette').then((m) => ({ default: m.CommandPalette })),
+)
+const ChatPanel = lazy(() =>
+  import('@/features/chat').then((m) => ({ default: m.ChatPanel })),
+)
+
+function PanelFallback() {
+  return <div className="flex-1 flex items-center justify-center text-xs text-muted-foreground">Loading...</div>
+}
+
 export function DesktopApp() {
   const {
-    loadVaults, initDb, selectedNodeId,
-    saveNode, createNode, toggleSearch,
-    toggleExtractions, toggleCommandPalette,
-    toggleChat, toggleSidebar, openTabs,
-    splitMode, toggleSplitMode, secondaryTabId,
-    secondaryNode, selectSecondaryNode, nodes,
-    userCss, activeTabId, closeTab, closeAllTabs,
-    switchToTab, deleteNode, toggleReadingMode,
-  } = useStore()
+    loadVaults,
+    initDb,
+    selectedNodeId,
+    saveNode,
+    createNode,
+    toggleSearch,
+    toggleExtractions,
+    toggleCommandPalette,
+    toggleChat,
+    toggleSidebar,
+    openTabs,
+    splitMode,
+    toggleSplitMode,
+    secondaryTabId,
+    secondaryNode,
+    selectSecondaryNode,
+    userCss,
+    activeTabId,
+    closeTab,
+    closeAllTabs,
+    switchToTab,
+    deleteNode,
+    toggleReadingMode,
+  } = useStore(
+    useShallow((s) => ({
+      loadVaults: s.loadVaults,
+      initDb: s.initDb,
+      selectedNodeId: s.selectedNodeId,
+      saveNode: s.saveNode,
+      createNode: s.createNode,
+      toggleSearch: s.toggleSearch,
+      toggleExtractions: s.toggleExtractions,
+      toggleCommandPalette: s.toggleCommandPalette,
+      toggleChat: s.toggleChat,
+      toggleSidebar: s.toggleSidebar,
+      openTabs: s.openTabs,
+      splitMode: s.splitMode,
+      toggleSplitMode: s.toggleSplitMode,
+      secondaryTabId: s.secondaryTabId,
+      secondaryNode: s.secondaryNode,
+      selectSecondaryNode: s.selectSecondaryNode,
+      userCss: s.userCss,
+      activeTabId: s.activeTabId,
+      closeTab: s.closeTab,
+      closeAllTabs: s.closeAllTabs,
+      switchToTab: s.switchToTab,
+      deleteNode: s.deleteNode,
+      toggleReadingMode: s.toggleReadingMode,
+    })),
+  )
 
   useEffect(() => {
     initDb().then(() => loadVaults())
-  }, [])
+  }, [initDb, loadVaults])
 
   useEffect(() => {
     const existing = document.getElementById('runestone-user-css')
@@ -100,13 +155,31 @@ export function DesktopApp() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [saveNode, createNode, toggleSearch, toggleExtractions, toggleCommandPalette, toggleChat, toggleSidebar, activeTabId, openTabs, closeTab, closeAllTabs, switchToTab, selectedNodeId, deleteNode, toggleReadingMode])
+  }, [
+    saveNode,
+    createNode,
+    toggleSearch,
+    toggleExtractions,
+    toggleCommandPalette,
+    toggleChat,
+    toggleSidebar,
+    activeTabId,
+    openTabs,
+    closeTab,
+    closeAllTabs,
+    switchToTab,
+    selectedNodeId,
+    deleteNode,
+    toggleReadingMode,
+  ])
 
   return (
     <div className="h-screen flex bg-background text-foreground overflow-hidden">
       <Sidebar />
       <div className="flex-1 flex min-w-0">
-        <GraphCanvas />
+        <Suspense fallback={<PanelFallback />}>
+          <GraphCanvas />
+        </Suspense>
         {selectedNodeId && (
           <div className="w-96 border-l shrink-0 flex flex-col min-h-0">
             {openTabs.length > 0 && (
@@ -147,9 +220,11 @@ export function DesktopApp() {
         )}
       </div>
       <SearchPanel />
-      <ExtractionReview />
-      <ChatPanel />
-      <CommandPalette />
+      <Suspense fallback={null}>
+        <ExtractionReview />
+        <ChatPanel />
+        <CommandPalette />
+      </Suspense>
     </div>
   )
 }

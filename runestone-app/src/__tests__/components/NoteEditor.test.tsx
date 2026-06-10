@@ -84,21 +84,21 @@ vi.mock('@/features/editor/FootnoteExtension', () => ({
 }))
 
 vi.mock('@tiptap/extension-table', () => ({
-  default: {
+  Table: {
     configure: () => ({}),
   },
 }))
 
 vi.mock('@tiptap/extension-table-row', () => ({
-  default: {},
+  TableRow: {},
 }))
 
 vi.mock('@tiptap/extension-table-cell', () => ({
-  default: {},
+  TableCell: {},
 }))
 
 vi.mock('@tiptap/extension-table-header', () => ({
-  default: {},
+  TableHeader: {},
 }))
 
 vi.mock('@/features/editor/WikiLinkSuggestion', () => ({

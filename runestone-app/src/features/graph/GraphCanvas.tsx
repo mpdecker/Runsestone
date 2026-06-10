@@ -1,5 +1,6 @@
 import { useEffect, useRef, useCallback } from 'react'
 import cytoscape, { type Core, type EventObject } from 'cytoscape'
+import { useShallow } from 'zustand/react/shallow'
 import { useStore } from '@/store'
 
 const NODE_COLORS: Record<string, string> = {
@@ -23,7 +24,31 @@ const MAX_RENDER_NODES = 500
 export function GraphCanvas() {
   const containerRef = useRef<HTMLDivElement>(null)
   const cyRef = useRef<Core | null>(null)
-  const { graphData, selectNode, selectedNodeId, loadLocalGraph, setGraphViewMode, graphViewMode, filterText, filterTypes, graphDepth, setGraphDepth, loadGraphData, vaultTags } = useStore()
+  const {
+    graphData,
+    selectNode,
+    selectedNodeId,
+    loadLocalGraph,
+    setGraphViewMode,
+    graphViewMode,
+    filterText,
+    filterTypes,
+    graphDepth,
+    setGraphDepth,
+  } = useStore(
+    useShallow((s) => ({
+      graphData: s.graphData,
+      selectNode: s.selectNode,
+      selectedNodeId: s.selectedNodeId,
+      loadLocalGraph: s.loadLocalGraph,
+      setGraphViewMode: s.setGraphViewMode,
+      graphViewMode: s.graphViewMode,
+      filterText: s.filterText,
+      filterTypes: s.filterTypes,
+      graphDepth: s.graphDepth,
+      setGraphDepth: s.setGraphDepth,
+    })),
+  )
 
   const updateGraph = useCallback(() => {
     if (!cyRef.current || !graphData) return

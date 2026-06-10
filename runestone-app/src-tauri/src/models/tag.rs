@@ -20,6 +20,7 @@ pub struct TagInfo {
     pub node_count: Option<i64>,
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Serialize, Deserialize, FromRow)]
 pub struct TaggedNode {
     pub node_id: Uuid,

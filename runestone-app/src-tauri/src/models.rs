@@ -7,12 +7,19 @@ pub mod chat;
 pub mod obsidian;
 pub mod tag;
 
+#[allow(unused_imports)]
 pub use vault::{CreateVaultRequest, Vault};
+#[allow(unused_imports)]
 pub use node::{CreateNodeRequest, Node, NodeIdRow, NodeListItem, UpdateNodeRequest};
+#[allow(unused_imports)]
 pub use graph::{Backlink, GraphData, GraphEdge, GraphNode, WikiLinkRow};
+#[allow(unused_imports)]
 pub use search::{SearchQuery, SearchResult, SearchResults};
+#[allow(unused_imports)]
 pub use extraction::{ExtractionNode, PendingExtraction};
+#[allow(unused_imports)]
 pub use chat::{ChatMessage, ChatRequest, ChatResponse, Citation, TagSuggestion};
+#[allow(unused_imports)]
 pub use obsidian::ObsidianImportResult;
 
 #[cfg(test)]

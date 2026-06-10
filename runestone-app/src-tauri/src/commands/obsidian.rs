@@ -1,6 +1,9 @@
 use crate::models::graph::WikiLinkRow;
-use crate::models::node::{Node, NodeIdRow};
+use crate::models::node::Node;
 use crate::models::obsidian::ObsidianImportResult;
+use crate::path_guard::canonicalize_path;
+use crate::repositories::node_repo;
+use crate::services::graph_sync;
 use crate::state::AppState;
 use uuid::Uuid;
 
@@ -10,13 +13,21 @@ pub async fn import_obsidian_vault(
     vault_id: Uuid,
     root_path: String,
 ) -> Result<ObsidianImportResult, String> {
+    let _vault = sqlx::query_as::<_, (String,)>("SELECT root_path FROM vaults WHERE id = $1")
+        .bind(vault_id)
+        .fetch_one(state.pg()?)
+        .await
+        .map_err(|e| format!("Vault not found: {}", e))?;
+
+    let import_root = canonicalize_path(&root_path).map_err(|e| e.to_string())?;
+
     let mut files_scanned = 0i32;
     let mut nodes_created = 0i32;
     let mut links_created = 0i32;
 
     let md_re = regex::Regex::new(r"\[\[([^\]]+)\]\]").unwrap();
 
-    for entry in walkdir::WalkDir::new(&root_path)
+    for entry in walkdir::WalkDir::new(&import_root)
         .into_iter()
         .filter_map(|e| e.ok())
         .filter(|e| e.path().extension().map_or(false, |ext| ext == "md"))
@@ -24,44 +35,48 @@ pub async fn import_obsidian_vault(
         files_scanned += 1;
         let file_path = entry.path().to_string_lossy().to_string();
 
-        let title = entry.path().file_stem().unwrap_or_default().to_string_lossy().to_string();
+        let title = entry
+            .path()
+            .file_stem()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
         let content = std::fs::read_to_string(entry.path()).unwrap_or_default();
 
-        let existing = sqlx::query_as::<_, NodeIdRow>(
-            "SELECT id FROM nodes WHERE vault_id = $1 AND file_path = $2",
+        if node_repo::find_by_file_path(state.pg()?, vault_id, &file_path)
+            .await
+            .map_err(|e| e.to_string())?
+            .is_some()
+        {
+            continue;
+        }
+
+        let id = Uuid::new_v4();
+        let wc = content.split_whitespace().count() as i32;
+
+        let node = sqlx::query_as::<_, Node>(
+            "INSERT INTO nodes (id, vault_id, title, content, content_type, file_path, word_count) VALUES ($1, $2, $3, $4, 'note', $5, $6) RETURNING id, vault_id, title, content, content_type, file_path, metadata, word_count, created_at, updated_at",
         )
+        .bind(id)
         .bind(vault_id)
+        .bind(&title)
+        .bind(&content)
         .bind(&file_path)
-    .fetch_optional(state.pg()?)
-    .await
-    .map_err(|e| format!("Query: {}", e))?;
+        .bind(wc)
+        .fetch_one(state.pg()?)
+        .await
+        .map_err(|e| format!("Insert: {}", e))?;
 
-    if existing.is_some() {
-        continue;
-    }
-
-    let id = Uuid::new_v4();
-    let wc = content.split_whitespace().count() as i32;
-
-    let node = sqlx::query_as::<_, Node>(
-        "INSERT INTO nodes (id, vault_id, title, content, content_type, file_path, word_count) VALUES ($1, $2, $3, $4, 'note', $5, $6) RETURNING id, vault_id, title, content, content_type, file_path, metadata, word_count, created_at, updated_at",
-    )
-    .bind(id)
-    .bind(vault_id)
-    .bind(&title)
-    .bind(&content)
-    .bind(&file_path)
-    .bind(wc)
-    .fetch_one(state.pg()?)
-    .await
-    .map_err(|e| format!("Insert: {}", e))?;
-
-    let _ = state.neo4j()?.run(
-            neo4rs::query("CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: 'note'})")
-                .param("pg_id", id.to_string())
-                .param("vault_id", vault_id.to_string())
-                .param("title", node.title.clone()),
-        ).await;
+        graph_sync::create_node_with_pg_rollback(
+            state.neo4j()?,
+            state.pg()?,
+            id,
+            vault_id,
+            &node.title,
+            &node.content_type,
+        )
+        .await
+        .map_err(|e| e.to_string())?;
 
         nodes_created += 1;
 
@@ -90,13 +105,8 @@ pub async fn import_obsidian_vault(
     .unwrap_or_default();
 
     for link in unresolved {
-        if let Ok(Some(resolved)) = sqlx::query_as::<_, NodeIdRow>(
-            "SELECT id FROM nodes WHERE vault_id = $1 AND title = $2 LIMIT 1",
-        )
-        .bind(vault_id)
-        .bind(&link.target_title)
-        .fetch_optional(state.pg()?)
-        .await
+        if let Ok(Some(resolved)) = node_repo::find_by_title(state.pg()?, vault_id, &link.target_title)
+            .await
         {
             let _ = sqlx::query("UPDATE wiki_links SET resolved_node_id = $1 WHERE id = $2")
                 .bind(resolved.id)
@@ -104,13 +114,15 @@ pub async fn import_obsidian_vault(
                 .execute(state.pg()?)
                 .await;
 
-            let _ = state.neo4j()?.run(
-                neo4rs::query("MATCH (a:Node {pg_id: $a_id}), (b:Node {pg_id: $b_id}) CREATE (a)-[:LINKS_TO {context: 'obsidian-import'}]->(b)")
-                    .param("a_id", link.source_node_id.to_string())
-                    .param("b_id", resolved.id.to_string()),
-            ).await;
+            graph_sync::create_wiki_link(state.neo4j()?, link.source_node_id, resolved.id)
+                .await
+                .map_err(|e| format!("Neo4j link resolution failed: {}", e))?;
         }
     }
 
-    Ok(ObsidianImportResult { nodes_created, links_created, files_scanned })
+    Ok(ObsidianImportResult {
+        nodes_created,
+        links_created,
+        files_scanned,
+    })
 }

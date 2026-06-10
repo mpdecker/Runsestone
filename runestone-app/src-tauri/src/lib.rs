@@ -2,10 +2,15 @@ mod commands;
 mod db;
 mod document;
 mod embedding;
+mod error;
 mod llm;
 mod models;
+mod path_guard;
 mod remote_api;
+mod repositories;
+mod services;
 mod state;
+mod util;
 
 use state::AppState;
 
@@ -91,6 +96,7 @@ pub fn run() {
             commands::clipper::start_clipper_server,
             commands::clipper::stop_clipper_server,
             commands::clipper::get_clipper_status,
+            commands::clipper::get_clipper_auth_token,
             commands::plugins::list_available_plugins,
             commands::plugins::read_plugin_file,
         ])

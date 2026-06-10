@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { DesktopApp } from '@/features/layout/DesktopApp'
 import { useStore } from '@/store'
 
@@ -71,18 +71,22 @@ describe('DesktopApp', () => {
     resetStore()
   })
 
-  it('renders sidebar and graph canvas', () => {
+  it('renders sidebar and graph canvas', async () => {
     render(<DesktopApp />)
     expect(screen.getByTestId('sidebar')).toBeInTheDocument()
-    expect(screen.getByTestId('graph-canvas')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByTestId('graph-canvas')).toBeInTheDocument()
+    })
   })
 
-  it('renders all panels', () => {
+  it('renders all panels', async () => {
     render(<DesktopApp />)
     expect(screen.getByTestId('search-panel')).toBeInTheDocument()
-    expect(screen.getByTestId('chat-panel')).toBeInTheDocument()
-    expect(screen.getByTestId('extraction-review')).toBeInTheDocument()
-    expect(screen.getByTestId('command-palette')).toBeInTheDocument()
+    await waitFor(() => {
+      expect(screen.getByTestId('chat-panel')).toBeInTheDocument()
+      expect(screen.getByTestId('extraction-review')).toBeInTheDocument()
+      expect(screen.getByTestId('command-palette')).toBeInTheDocument()
+    })
   })
 
   it('does not render NoteEditor when no node selected', () => {

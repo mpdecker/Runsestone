@@ -149,12 +149,16 @@ export async function getClipperStatus(): Promise<number | null> {
   return invoke('get_clipper_status')
 }
 
+export async function getClipperAuthToken(): Promise<string> {
+  return invoke('get_clipper_auth_token')
+}
+
 export async function listAvailablePlugins(pluginDir: string): Promise<PluginInfo[]> {
   return invoke('list_available_plugins', { pluginDir })
 }
 
-export async function readPluginFile(path: string): Promise<string> {
-  return invoke('read_plugin_file', { path })
+export async function readPluginFile(pluginRoot: string, relativePath: string): Promise<string> {
+  return invoke('read_plugin_file', { pluginRoot, relativePath })
 }
 
 export async function importDocument(vaultId: string, filePath: string): Promise<Node> {

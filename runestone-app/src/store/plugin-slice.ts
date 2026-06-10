@@ -1,5 +1,6 @@
 import type { StateCreator } from 'zustand'
 import type { PluginInfo, PluginInstance } from '../lib/plugin-types'
+import type { AppStore } from './index'
 import * as api from '../lib/api'
 import { getPluginManager, type RegisteredPanel, type RegisteredCommand } from '../lib/plugin-manager'
 
@@ -17,8 +18,7 @@ export interface PluginSlice {
   unloadPlugin: (name: string) => void
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createPluginSlice: StateCreator<any, [], [], PluginSlice> = (set, get) => ({
+export const createPluginSlice: StateCreator<AppStore, [], [], PluginSlice> = (set, get) => ({
   pluginDir: '',
   availablePlugins: [],
   installedPlugins: [],
@@ -48,8 +48,7 @@ export const createPluginSlice: StateCreator<any, [], [], PluginSlice> = (set, g
     if (mgr.isLoaded(info.name)) return
 
     try {
-      const mainPath = `${info.path.replace(/\\/g, '/')}/${info.main_file}`
-      const code = await api.readPluginFile(mainPath)
+      const code = await api.readPluginFile(info.path, info.main_file)
       await mgr.loadPlugin(info, code)
       const plugins = mgr.getPlugins()
       set({ installedPlugins: plugins })

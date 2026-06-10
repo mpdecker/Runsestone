@@ -1,6 +1,8 @@
 use crate::embedding::generate_embedding;
-use crate::models::node::{CreateNodeRequest, Node, NodeIdRow, NodeListItem, UpdateNodeRequest};
+use crate::models::node::{CreateNodeRequest, Node, NodeListItem, UpdateNodeRequest};
 use crate::models::vault::Vault;
+use crate::repositories::node_repo;
+use crate::services::graph_sync;
 use crate::state::AppState;
 use uuid::Uuid;
 
@@ -25,25 +27,16 @@ pub async fn create_node(
     .await
     .map_err(|e| format!("Failed to insert node into PostgreSQL: {}", e))?;
 
-    let pg_id = id.to_string();
-        let neo4j_result = state
-        .neo4j()?
-        .run(
-            neo4rs::query("CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: $content_type})")
-                .param("pg_id", pg_id)
-                .param("vault_id", request.vault_id.to_string())
-                .param("title", row.title.clone())
-                .param("content_type", row.content_type.clone()),
-        )
-        .await;
-
-    if let Err(e) = neo4j_result {
-        let _ = sqlx::query("DELETE FROM nodes WHERE id = $1")
-            .bind(id)
-            .execute(state.pg()?)
-            .await;
-        return Err(format!("Neo4j insert failed, rolled back PostgreSQL: {}", e));
-    }
+    graph_sync::create_node_with_pg_rollback(
+        state.neo4j()?,
+        state.pg()?,
+        id,
+        request.vault_id,
+        &row.title,
+        &row.content_type,
+    )
+    .await
+    .map_err(|e| e.to_string())?;
 
     if !row.content.is_empty() {
         let pg = state.pg()?.clone();
@@ -75,13 +68,9 @@ pub async fn update_node(
     state: tauri::State<'_, AppState>,
     request: UpdateNodeRequest,
 ) -> Result<Node, String> {
-    let current = sqlx::query_as::<_, Node>(
-        "SELECT id, vault_id, title, content, content_type, file_path, metadata, word_count, created_at, updated_at FROM nodes WHERE id = $1",
-    )
-    .bind(request.id)
-    .fetch_one(state.pg()?)
-    .await
-    .map_err(|e| format!("Node not found: {}", e))?;
+    let current = node_repo::get_by_id(state.pg()?, request.id)
+        .await
+        .map_err(|e| e.to_string())?;
 
     let new_title = request.title.unwrap_or(current.title.clone());
     let new_content = request.content.unwrap_or(current.content.clone());
@@ -125,15 +114,14 @@ pub async fn update_node(
     .await
     .map_err(|e| format!("Failed to update node: {}", e))?;
 
-    let _ = state
-        .neo4j()?
-        .run(
-            neo4rs::query("MATCH (n:Node {pg_id: $pg_id}) SET n.title = $title, n.content_type = $content_type")
-                .param("pg_id", request.id.to_string())
-                .param("title", row.title.clone())
-                .param("content_type", row.content_type.clone()),
-        )
-        .await;
+    graph_sync::update_node(
+        state.neo4j()?,
+        request.id,
+        &row.title,
+        &row.content_type,
+    )
+    .await
+    .map_err(|e| format!("Neo4j update failed: {}", e))?;
 
     let pg = state.pg()?.clone();
     let config = state.embed_config.clone();
@@ -163,19 +151,13 @@ pub async fn delete_node(
     state: tauri::State<'_, AppState>,
     id: Uuid,
 ) -> Result<(), String> {
-    let _ = state
-        .neo4j()?
-        .run(
-            neo4rs::query("MATCH (n:Node {pg_id: $pg_id}) DETACH DELETE n")
-                .param("pg_id", id.to_string()),
-        )
-        .await;
-
-    sqlx::query("DELETE FROM nodes WHERE id = $1")
-        .bind(id)
-        .execute(state.pg()?)
+    graph_sync::delete_node_before_pg(state.neo4j()?, id)
         .await
-        .map_err(|e| format!("Failed to delete PostgreSQL node: {}", e))?;
+        .map_err(|e| format!("Neo4j delete failed: {}", e))?;
+
+    node_repo::delete_by_id(state.pg()?, id)
+        .await
+        .map_err(|e| e.to_string())?;
 
     Ok(())
 }
@@ -185,15 +167,9 @@ pub async fn get_node(
     state: tauri::State<'_, AppState>,
     id: Uuid,
 ) -> Result<Node, String> {
-    let row = sqlx::query_as::<_, Node>(
-        "SELECT id, vault_id, title, content, content_type, file_path, metadata, word_count, created_at, updated_at FROM nodes WHERE id = $1",
-    )
-    .bind(id)
-    .fetch_one(state.pg()?)
-    .await
-    .map_err(|e| format!("Node not found: {}", e))?;
-
-    Ok(row)
+    node_repo::get_by_id(state.pg()?, id)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -201,15 +177,9 @@ pub async fn list_nodes(
     state: tauri::State<'_, AppState>,
     vault_id: Uuid,
 ) -> Result<Vec<NodeListItem>, String> {
-    let nodes = sqlx::query_as::<_, NodeListItem>(
-        "SELECT id, title, content_type, file_path, updated_at FROM nodes WHERE vault_id = $1 ORDER BY updated_at DESC",
-    )
-    .bind(vault_id)
-    .fetch_all(state.pg()?)
-    .await
-    .map_err(|e| format!("Failed to list nodes: {}", e))?;
-
-    Ok(nodes)
+    node_repo::list_by_vault(state.pg()?, vault_id)
+        .await
+        .map_err(|e| e.to_string())
 }
 
 #[tauri::command]
@@ -240,16 +210,11 @@ pub async fn scan_vault(
             .to_string_lossy()
             .to_string();
 
-        let existing = sqlx::query_as::<_, NodeIdRow>(
-            "SELECT id FROM nodes WHERE vault_id = $1 AND file_path = $2",
-        )
-        .bind(vault_id)
-        .bind(&file_path)
-        .fetch_optional(state.pg()?)
-        .await
-        .map_err(|e| format!("Query error: {}", e))?;
-
-        if existing.is_some() {
+        if node_repo::find_by_file_path(state.pg()?, vault_id, &file_path)
+            .await
+            .map_err(|e| e.to_string())?
+            .is_some()
+        {
             continue;
         }
 
@@ -270,15 +235,16 @@ pub async fn scan_vault(
         .await
         .map_err(|e| format!("Failed to insert node: {}", e))?;
 
-        let _ = state
-            .neo4j()?
-            .run(
-                neo4rs::query("CREATE (n:Node {pg_id: $pg_id, vault_id: $vault_id, title: $title, content_type: 'note'})")
-                    .param("pg_id", id.to_string())
-                    .param("vault_id", vault_id.to_string())
-                    .param("title", node.title.clone()),
-            )
-            .await;
+        graph_sync::create_node_with_pg_rollback(
+            state.neo4j()?,
+            state.pg()?,
+            id,
+            vault_id,
+            &node.title,
+            &node.content_type,
+        )
+        .await
+        .map_err(|e| e.to_string())?;
 
         created_nodes.push(NodeListItem {
             id: node.id,

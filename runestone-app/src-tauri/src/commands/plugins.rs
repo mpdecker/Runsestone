@@ -1,5 +1,4 @@
 use serde::{Deserialize, Serialize};
-use std::path::PathBuf;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PluginInfo {
@@ -47,7 +46,20 @@ pub async fn list_available_plugins(
 }
 
 #[tauri::command]
-pub async fn read_plugin_file(path: String) -> Result<String, String> {
-    std::fs::read_to_string(&path)
+pub async fn read_plugin_file(plugin_root: String, relative_path: String) -> Result<String, String> {
+    let root = std::path::Path::new(&plugin_root)
+        .canonicalize()
+        .map_err(|e| format!("Invalid plugin root: {}", e))?;
+
+    let joined = root.join(&relative_path);
+    let canonical = joined
+        .canonicalize()
+        .map_err(|e| format!("Invalid plugin file path: {}", e))?;
+
+    if !canonical.starts_with(&root) {
+        return Err("Plugin file must be within plugin directory".to_string());
+    }
+
+    std::fs::read_to_string(&canonical)
         .map_err(|e| format!("Failed to read plugin file: {}", e))
 }

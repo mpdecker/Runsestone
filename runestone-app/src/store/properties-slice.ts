@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import type { PropertiesResponse, NodeProperty } from '../lib/types'
+import type { NodeProperty } from '../lib/types'
 import * as api from '../lib/api'
 
 export interface PropertiesSlice {
@@ -10,7 +10,7 @@ export interface PropertiesSlice {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export const createPropertiesSlice: StateCreator<any, [], [], PropertiesSlice> = (set, get) => ({
+export const createPropertiesSlice: StateCreator<any, [], [], PropertiesSlice> = (set) => ({
   nodeProperties: [],
 
   loadNodeProperties: async (nodeId: string) => {

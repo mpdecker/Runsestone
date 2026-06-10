@@ -1,5 +1,6 @@
-use crate::models::tag::{AddTagsRequest, RemoveTagRequest, TagInfo, TagsResponse};
 use crate::models::node::NodeListItem;
+use crate::models::tag::{AddTagsRequest, RemoveTagRequest, TagInfo, TagsResponse};
+use crate::services::graph_sync;
 use crate::state::AppState;
 use uuid::Uuid;
 
@@ -22,10 +23,7 @@ pub async fn get_node_tags(
         .and_then(|v| serde_json::from_value::<Vec<String>>(v).ok())
         .unwrap_or_default();
 
-    Ok(TagsResponse {
-        node_id,
-        tags,
-    })
+    Ok(TagsResponse { node_id, tags })
 }
 
 #[tauri::command]
@@ -68,16 +66,9 @@ pub async fn add_tags_to_node(
 
     for tag in &new_tags {
         if !existing_tags.contains(tag) {
-            let _ = state
-                .neo4j()?
-                .run(
-                    neo4rs::query(
-                        "MERGE (t:Tag {name: $tag_name}) WITH t MATCH (n:Node {pg_id: $pg_id}) MERGE (n)-[:HAS_TAG]->(t)",
-                    )
-                    .param("tag_name", tag.as_str())
-                    .param("pg_id", request.node_id.to_string()),
-                )
-                .await;
+            graph_sync::add_tag(state.neo4j()?, request.node_id, tag)
+                .await
+                .map_err(|e| format!("Neo4j tag sync failed: {}", e))?;
         }
     }
 
@@ -123,16 +114,9 @@ pub async fn remove_tag_from_node(
         .await
         .map_err(|e| format!("Failed to update tags: {}", e))?;
 
-    let _ = state
-        .neo4j()?
-        .run(
-            neo4rs::query(
-                "MATCH (n:Node {pg_id: $pg_id})-[r:HAS_TAG]->(t:Tag {name: $tag_name}) DELETE r",
-            )
-            .param("pg_id", request.node_id.to_string())
-            .param("tag_name", request.tag.as_str()),
-        )
-        .await;
+    graph_sync::remove_tag(state.neo4j()?, request.node_id, &request.tag)
+        .await
+        .map_err(|e| format!("Neo4j tag removal failed: {}", e))?;
 
     Ok(TagsResponse {
         node_id: request.node_id,
@@ -193,9 +177,5 @@ pub async fn accept_tag_suggestions(
     node_id: Uuid,
     tags: Vec<String>,
 ) -> Result<TagsResponse, String> {
-    add_tags_to_node(
-        state,
-        AddTagsRequest { node_id, tags },
-    )
-    .await
+    add_tags_to_node(state, AddTagsRequest { node_id, tags }).await
 }
