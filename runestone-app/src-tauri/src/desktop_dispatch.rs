@@ -73,13 +73,6 @@ pub async fn dispatch_desktop_only(
     }
 }
 
-fn parse_uuid(args: &Value) -> Result<Uuid, String> {
-    if let Some(s) = args.as_str() {
-        return Uuid::parse_str(s).map_err(|e| e.to_string());
-    }
-    serde_json::from_value(args.clone()).map_err(|e| e.to_string())
-}
-
 fn parse_field<T: serde::de::DeserializeOwned>(args: &Value, field: &str) -> Result<T, String> {
     if let Some(obj) = args.as_object() {
         if let Some(val) = obj.get(field) {

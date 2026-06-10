@@ -146,13 +146,12 @@ pub async fn scan_vault_impl(
 
         for node in db_nodes {
             if let Some(ref path) = node.file_path {
-                if !seen_paths.contains(path) {
-                    if vault_sync::delete_by_path(&pool, &graph, vault_id, path)
+                if !seen_paths.contains(path)
+                    && vault_sync::delete_by_path(&pool, &graph, vault_id, path)
                         .await
                         .map_err(|e| e.to_string())?
-                    {
-                        result.deleted += 1;
-                    }
+                {
+                    result.deleted += 1;
                 }
             }
         }
