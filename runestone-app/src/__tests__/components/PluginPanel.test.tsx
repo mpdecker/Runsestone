@@ -32,12 +32,18 @@ describe('PluginPanel', () => {
     let dirSet = ''
     let discovered = false
     useStore.setState({
-      setPluginDir: (d: string) => { dirSet = d },
-      discoverPlugins: async () => { discovered = true },
+      setPluginDir: (d: string) => {
+        dirSet = d
+      },
+      discoverPlugins: async () => {
+        discovered = true
+      },
     } as any)
     render(<PluginPanel />)
 
-    fireEvent.change(screen.getByPlaceholderText('Plugins directory path...'), { target: { value: '/home/plugins' } })
+    fireEvent.change(screen.getByPlaceholderText('Plugins directory path...'), {
+      target: { value: '/home/plugins' },
+    })
     fireEvent.click(screen.getByText('Scan'))
 
     expect(dirSet).toBe('/home/plugins')
@@ -78,7 +84,12 @@ describe('PluginPanel', () => {
       ],
       installedPlugins: [
         {
-          manifest: { name: 'test-plugin', version: '1.0.0', description: 'Test', main: 'index.js' },
+          manifest: {
+            name: 'test-plugin',
+            version: '1.0.0',
+            description: 'Test',
+            main: 'index.js',
+          },
           enabled: true,
           activate: () => {},
           deactivate: () => {},
@@ -96,7 +107,12 @@ describe('PluginPanel', () => {
       ],
       installedPlugins: [
         {
-          manifest: { name: 'test-plugin', version: '1.0.0', description: 'Test', main: 'index.js' },
+          manifest: {
+            name: 'test-plugin',
+            version: '1.0.0',
+            description: 'Test',
+            main: 'index.js',
+          },
           enabled: false,
           activate: () => {},
           deactivate: () => {},

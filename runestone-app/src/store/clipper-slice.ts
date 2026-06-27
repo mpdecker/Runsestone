@@ -20,10 +20,7 @@ export const createClipperSlice: StateCreator<AppStore, [], [], ClipperSlice> = 
 
   loadClipperStatus: async () => {
     try {
-      const [port, token] = await Promise.all([
-        api.getClipperStatus(),
-        api.getClipperAuthToken(),
-      ])
+      const [port, token] = await Promise.all([api.getClipperStatus(), api.getClipperAuthToken()])
       set({ clipperPort: port, clipperAuthToken: token })
     } catch {
       // clipper not available

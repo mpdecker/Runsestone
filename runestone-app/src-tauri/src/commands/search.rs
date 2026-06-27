@@ -1,6 +1,6 @@
-use crate::router::dispatch;
 use crate::models::node::Node;
 use crate::models::search::{SearchQuery, SearchResult, SearchResults};
+use crate::router::dispatch;
 use crate::state::AppState;
 use uuid::Uuid;
 

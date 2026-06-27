@@ -6,7 +6,17 @@ import { Button } from '@/components/ui/button'
 const NODES_PER_PAGE = 50
 
 export function NodeList() {
-  const { nodes, selectedNodeId, selectNode, deleteNode, filterText, filterTypes, splitMode, selectSecondaryNode, secondaryTabId } = useStore(
+  const {
+    nodes,
+    selectedNodeId,
+    selectNode,
+    deleteNode,
+    filterText,
+    filterTypes,
+    splitMode,
+    selectSecondaryNode,
+    secondaryTabId,
+  } = useStore(
     useShallow((s) => ({
       nodes: s.nodes,
       selectedNodeId: s.selectedNodeId,
@@ -49,7 +59,10 @@ export function NodeList() {
             variant="ghost"
             size="icon"
             className="h-5 w-5 opacity-0 group-hover:opacity-100"
-            onClick={(e) => { e.stopPropagation(); deleteNode(n.id) }}
+            onClick={(e) => {
+              e.stopPropagation()
+              deleteNode(n.id)
+            }}
           >
             <span className="text-xs">x</span>
           </Button>
@@ -57,9 +70,27 @@ export function NodeList() {
       ))}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-1 pt-1">
-          <Button variant="ghost" size="sm" className="text-[10px] h-5 px-1" onClick={() => setNodePage(Math.max(0, nodePage - 1))} disabled={nodePage === 0}>\u2190</Button>
-          <span className="text-[10px] text-muted-foreground">{nodePage + 1}/{totalPages}</span>
-          <Button variant="ghost" size="sm" className="text-[10px] h-5 px-1" onClick={() => setNodePage(Math.min(totalPages - 1, nodePage + 1))} disabled={nodePage >= totalPages - 1}>\u2192</Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[10px] h-5 px-1"
+            onClick={() => setNodePage(Math.max(0, nodePage - 1))}
+            disabled={nodePage === 0}
+          >
+            \u2190
+          </Button>
+          <span className="text-[10px] text-muted-foreground">
+            {nodePage + 1}/{totalPages}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-[10px] h-5 px-1"
+            onClick={() => setNodePage(Math.min(totalPages - 1, nodePage + 1))}
+            disabled={nodePage >= totalPages - 1}
+          >
+            \u2192
+          </Button>
         </div>
       )}
       {filteredNodes.length === 0 && (

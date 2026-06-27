@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback } from 'react'
+import type { Editor } from '@tiptap/react'
 
 interface Props {
-  editor: any
+  editor: Editor | null
 }
 
 export function AudioRecorder({ editor }: Props) {
@@ -13,16 +14,24 @@ export function AudioRecorder({ editor }: Props) {
   const timerRef = useRef<number | null>(null)
 
   const clearTimer = useCallback(() => {
-    if (timerRef.current) { clearInterval(timerRef.current); timerRef.current = null }
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
+    }
   }, [])
 
   const startTimer = useCallback(() => {
     timerRef.current = window.setInterval(() => setElapsed((e) => e + 1), 1000)
   }, [])
 
-  const insertAudio = useCallback((base64: string) => {
-    editor?.commands?.insertContent(`<audio controls src="${base64}" class="my-2 w-full max-w-md"></audio>`)
-  }, [editor])
+  const insertAudio = useCallback(
+    (base64: string) => {
+      editor?.commands?.insertContent(
+        `<audio controls src="${base64}" class="my-2 w-full max-w-md"></audio>`,
+      )
+    },
+    [editor],
+  )
 
   const finalizeRecording = useCallback(() => {
     clearTimer()

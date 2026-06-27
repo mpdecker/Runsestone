@@ -107,7 +107,14 @@ describe('ExtractionReview', () => {
     useStore.setState({
       showExtractions: true,
       extractionResults: [
-        { name: 'E1', description: 'd', extraction_type: 'entity', confidence: 0.8, source_node_id: 'n-1', chunk_index: 0 },
+        {
+          name: 'E1',
+          description: 'd',
+          extraction_type: 'entity',
+          confidence: 0.8,
+          source_node_id: 'n-1',
+          chunk_index: 0,
+        },
       ],
     })
     render(<ExtractionReview />)

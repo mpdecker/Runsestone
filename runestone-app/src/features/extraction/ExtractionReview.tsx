@@ -4,10 +4,16 @@ import type { PendingExtraction } from '@/lib/types'
 
 export function ExtractionReview() {
   const {
-    showExtractions, toggleExtractions,
-    pendingExtractions, extractionResults,
-    approveExtraction, rejectExtraction, batchApproveExtractions,
-    selectedNodeId, extractFromDocument, isLoading,
+    showExtractions,
+    toggleExtractions,
+    pendingExtractions,
+    extractionResults,
+    approveExtraction,
+    rejectExtraction,
+    batchApproveExtractions,
+    selectedNodeId,
+    extractFromDocument,
+    isLoading,
   } = useStore()
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
@@ -62,10 +68,16 @@ export function ExtractionReview() {
       </div>
 
       <div className="border-b px-3 py-1.5 flex items-center gap-2">
-        <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={selectAll}>
+        <button
+          className="text-[10px] text-muted-foreground hover:text-foreground"
+          onClick={selectAll}
+        >
           All
         </button>
-        <button className="text-[10px] text-muted-foreground hover:text-foreground" onClick={clearSelection}>
+        <button
+          className="text-[10px] text-muted-foreground hover:text-foreground"
+          onClick={clearSelection}
+        >
           None
         </button>
         {selectedIds.size > 0 && (

@@ -5,7 +5,18 @@ import { makeNode } from '@/__tests__/helpers/fixtures'
 const mockApi = vi.hoisted(() => ({
   initDatabase: vi.fn().mockResolvedValue('ok'),
   listVaults: vi.fn().mockResolvedValue([]),
-  getNode: vi.fn().mockResolvedValue({ id: 'n-1', vault_id: 'v-1', title: 'Test', content: '<p>Hi</p>', content_type: 'note', file_path: null, metadata: {}, word_count: 1, created_at: null, updated_at: null }),
+  getNode: vi.fn().mockResolvedValue({
+    id: 'n-1',
+    vault_id: 'v-1',
+    title: 'Test',
+    content: '<p>Hi</p>',
+    content_type: 'note',
+    file_path: null,
+    metadata: {},
+    word_count: 1,
+    created_at: null,
+    updated_at: null,
+  }),
   listNodes: vi.fn().mockResolvedValue([]),
   loadGraphData: vi.fn().mockResolvedValue({ nodes: [], edges: [] }),
 }))
@@ -88,7 +99,11 @@ describe('tab-slice', () => {
     })
 
     it('clears node state when closing last tab', () => {
-      useStore.setState({ selectedNodeId: 'n-1', currentNode: makeNode({ id: 'n-1' }), nodeTags: { node_id: 'n-1', tags: [] } })
+      useStore.setState({
+        selectedNodeId: 'n-1',
+        currentNode: makeNode({ id: 'n-1' }),
+        nodeTags: { node_id: 'n-1', tags: [] },
+      })
       useStore.getState().addTab('n-1', 'First')
       useStore.getState().closeTab('n-1')
 

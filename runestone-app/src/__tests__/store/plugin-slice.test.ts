@@ -68,7 +68,9 @@ describe('plugin-slice', () => {
     })
 
     it('calls API and sets availablePlugins', async () => {
-      const plugins = [{ name: 'test-plugin', version: '1.0.0', path: '/p/test', main_file: 'index.js' }]
+      const plugins = [
+        { name: 'test-plugin', version: '1.0.0', path: '/p/test', main_file: 'index.js' },
+      ]
       mockApi.listAvailablePlugins.mockResolvedValue(plugins)
       useStore.setState({ pluginDir: '/home/plugins' })
 
@@ -94,7 +96,14 @@ describe('plugin-slice', () => {
   describe('loadPlugin', () => {
     it('does not reload already loaded plugins', async () => {
       mockManager.plugins.set('loaded', { manifest: { name: 'loaded' }, enabled: false })
-      const info = { name: 'loaded', version: '1.0.0', path: '/p', main_file: 'index.js', description: 'Test', author: 'Runestone' }
+      const info = {
+        name: 'loaded',
+        version: '1.0.0',
+        path: '/p',
+        main_file: 'index.js',
+        description: 'Test',
+        author: 'Runestone',
+      }
 
       await useStore.getState().loadPlugin(info)
 

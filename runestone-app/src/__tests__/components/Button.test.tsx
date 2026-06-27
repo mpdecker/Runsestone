@@ -12,7 +12,15 @@ describe('Button', () => {
   it('handles click events', async () => {
     let clicked = false
     const user = userEvent.setup()
-    render(<Button onClick={() => { clicked = true }}>Click</Button>)
+    render(
+      <Button
+        onClick={() => {
+          clicked = true
+        }}
+      >
+        Click
+      </Button>,
+    )
     await user.click(screen.getByText('Click'))
     expect(clicked).toBe(true)
   })

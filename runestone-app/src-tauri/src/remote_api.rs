@@ -14,15 +14,12 @@ pub async fn remote_invoke<T: DeserializeOwned>(
 
     if api_url.is_empty() {
         return Err(
-            "No server URL configured. Go to Settings to connect to a Runestone server.".to_string(),
+            "No server URL configured. Go to Settings to connect to a Runestone server."
+                .to_string(),
         );
     }
 
-    let url = format!(
-        "{}/api/invoke/{}",
-        api_url.trim_end_matches('/'),
-        command
-    );
+    let url = format!("{}/api/invoke/{}", api_url.trim_end_matches('/'), command);
     let client = reqwest::Client::new();
 
     let mut req = client

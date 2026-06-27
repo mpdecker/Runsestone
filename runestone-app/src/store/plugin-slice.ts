@@ -2,7 +2,11 @@ import type { StateCreator } from 'zustand'
 import type { PluginInfo, PluginInstance } from '../lib/plugin-types'
 import type { AppStore } from './index'
 import * as api from '../lib/api'
-import { getPluginManager, type RegisteredPanel, type RegisteredCommand } from '../lib/plugin-manager'
+import {
+  getPluginManager,
+  type RegisteredPanel,
+  type RegisteredCommand,
+} from '../lib/plugin-manager'
 
 export interface PluginSlice {
   pluginDir: string

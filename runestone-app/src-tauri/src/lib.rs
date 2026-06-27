@@ -1,7 +1,7 @@
 mod commands;
 mod desktop_dispatch;
-mod router;
 mod remote_api;
+mod router;
 mod state;
 mod vault_watcher;
 
@@ -31,9 +31,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
-        .setup(|app| {
-            AppState::init(app).map_err(|e| e.to_string().into())
-        })
+        .setup(|app| AppState::init(app).map_err(|e| e.to_string().into()))
         .invoke_handler(tauri::generate_handler![
             get_platform,
             commands::server::configure_server_connection,
@@ -54,6 +52,8 @@ pub fn run() {
             commands::graph::parse_wiki_links,
             commands::graph::get_backlinks,
             commands::graph::get_outgoing_links,
+            commands::graph::run_cypher,
+            commands::graph::graph_query,
             commands::search::semantic_search,
             commands::search::find_similar,
             commands::search::hybrid_search,
@@ -63,6 +63,7 @@ pub fn run() {
             commands::search::add_alias,
             commands::search::remove_alias,
             commands::document::import_document,
+            commands::document::acquire_document,
             commands::document::extract_from_document,
             commands::extraction::get_pending_extractions,
             commands::extraction::approve_extraction,

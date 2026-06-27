@@ -11,7 +11,9 @@ interface TreeNode {
   content_type?: string
 }
 
-export function buildTree(nodes: { id: string; title: string; content_type: string; file_path: string | null }[]): TreeNode[] {
+export function buildTree(
+  nodes: { id: string; title: string; content_type: string; file_path: string | null }[],
+): TreeNode[] {
   const root: TreeNode = { name: '/', path: '/', isFolder: true, children: [] }
 
   const itemsWithPath = nodes.filter((n) => n.file_path)
@@ -84,10 +86,7 @@ export function buildTree(nodes: { id: string; title: string; content_type: stri
 export function sortTree(nodes: TreeNode[]): TreeNode[] {
   const folders = nodes.filter((n) => n.isFolder).sort((a, b) => a.name.localeCompare(b.name))
   const files = nodes.filter((n) => !n.isFolder).sort((a, b) => a.name.localeCompare(b.name))
-  return [
-    ...folders.map((f) => ({ ...f, children: sortTree(f.children) })),
-    ...files,
-  ]
+  return [...folders.map((f) => ({ ...f, children: sortTree(f.children) })), ...files]
 }
 
 function TreeNodeRow({
@@ -182,9 +181,7 @@ export function FileTree() {
           onSelectNode={selectNode}
         />
       ))}
-      {tree.length === 0 && (
-        <p className="text-xs text-muted-foreground px-2 py-1">No notes</p>
-      )}
+      {tree.length === 0 && <p className="text-xs text-muted-foreground px-2 py-1">No notes</p>}
     </div>
   )
 }

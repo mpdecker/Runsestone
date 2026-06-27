@@ -1,6 +1,6 @@
 use runestone_core::db::{create_neo4j_graph, create_pg_pool, run_neo4j_init, run_pg_migrations};
-use runestone_core::handlers::embeddings;
 use runestone_core::embedding::EmbeddingConfig;
+use runestone_core::handlers::embeddings;
 use runestone_core::llm::LlmConfig;
 use runestone_core::BackendContext;
 use serde::{Deserialize, Serialize};
@@ -192,14 +192,21 @@ impl AppState {
 
     pub fn set_remote_config(&self, api_url: String, auth_token: Option<String>) {
         if let Ok(mut mode) = self.connection_mode.lock() {
-            *mode = ConnectionMode::Remote { api_url, auth_token };
+            *mode = ConnectionMode::Remote {
+                api_url,
+                auth_token,
+            };
         }
         self.set_remote_connected(false);
     }
 
     pub fn get_remote_config(&self) -> Option<(String, Option<String>)> {
         if let Ok(mode) = self.connection_mode.lock() {
-            if let ConnectionMode::Remote { api_url, auth_token } = mode.clone() {
+            if let ConnectionMode::Remote {
+                api_url,
+                auth_token,
+            } = mode.clone()
+            {
                 return Some((api_url, auth_token));
             }
         }

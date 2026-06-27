@@ -118,9 +118,8 @@ pub async fn start_clipper_server_impl(
 
                 if request_line.starts_with("GET /health") {
                     if !request_has_valid_token(&headers) {
-                        let _ = stream.write_all(
-                            b"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n",
-                        );
+                        let _ = stream
+                            .write_all(b"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n");
                         continue;
                     }
                     let _ = stream.write_all(b"HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: http://localhost\r\nContent-Type: application/json\r\nContent-Length: 20\r\n\r\n{\"status\":\"running\"}");
@@ -132,16 +131,14 @@ pub async fn start_clipper_server_impl(
                 }
 
                 if !request_has_valid_token(&headers) {
-                    let _ = stream.write_all(
-                        b"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n",
-                    );
+                    let _ =
+                        stream.write_all(b"HTTP/1.1 401 Unauthorized\r\nContent-Length: 0\r\n\r\n");
                     continue;
                 }
 
                 if content_length > MAX_CLIPPER_BODY_BYTES {
-                    let _ = stream.write_all(
-                        b"HTTP/1.1 413 Payload Too Large\r\nContent-Length: 0\r\n\r\n",
-                    );
+                    let _ = stream
+                        .write_all(b"HTTP/1.1 413 Payload Too Large\r\nContent-Length: 0\r\n\r\n");
                     continue;
                 }
 
@@ -154,9 +151,7 @@ pub async fn start_clipper_server_impl(
                 let clip: serde_json::Value = match serde_json::from_str(&body_str) {
                     Ok(v) => v,
                     Err(_) => {
-                        let _ = stream.write_all(
-                            b"HTTP/1.1 400 Bad Request\r\n\r\nInvalid JSON",
-                        );
+                        let _ = stream.write_all(b"HTTP/1.1 400 Bad Request\r\n\r\nInvalid JSON");
                         continue;
                     }
                 };

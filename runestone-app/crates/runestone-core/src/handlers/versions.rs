@@ -19,10 +19,7 @@ pub async fn get_node_versions(
     Ok(versions)
 }
 
-pub async fn restore_node_version(
-    ctx: &BackendContext,
-    version_id: Uuid,
-) -> Result<Node, String> {
+pub async fn restore_node_version(ctx: &BackendContext, version_id: Uuid) -> Result<Node, String> {
     let version = sqlx::query_as::<_, NodeVersion>(
         "SELECT id, node_id, version_number, title, content, word_count, created_at FROM node_versions WHERE id = $1",
     )

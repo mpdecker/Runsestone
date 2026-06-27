@@ -16,7 +16,10 @@ export interface ExtractionSlice {
   toggleExtractions: () => void
 }
 
-export const createExtractionSlice: StateCreator<AppStore, [], [], ExtractionSlice> = (set, get) => ({
+export const createExtractionSlice: StateCreator<AppStore, [], [], ExtractionSlice> = (
+  set,
+  get,
+) => ({
   pendingExtractions: [],
   showExtractions: false,
   extractionResults: [],
@@ -61,7 +64,9 @@ export const createExtractionSlice: StateCreator<AppStore, [], [], ExtractionSli
   approveExtraction: async (id: string) => {
     try {
       await api.approveExtraction(id)
-      set((s: { pendingExtractions: PendingExtraction[] }) => ({ pendingExtractions: s.pendingExtractions.filter((p: PendingExtraction) => p.id !== id) }))
+      set((s: { pendingExtractions: PendingExtraction[] }) => ({
+        pendingExtractions: s.pendingExtractions.filter((p: PendingExtraction) => p.id !== id),
+      }))
     } catch (e) {
       set({ error: `Approve failed: ${e}` })
     }
@@ -70,7 +75,9 @@ export const createExtractionSlice: StateCreator<AppStore, [], [], ExtractionSli
   rejectExtraction: async (id: string) => {
     try {
       await api.rejectExtraction(id)
-      set((s: { pendingExtractions: PendingExtraction[] }) => ({ pendingExtractions: s.pendingExtractions.filter((p: PendingExtraction) => p.id !== id) }))
+      set((s: { pendingExtractions: PendingExtraction[] }) => ({
+        pendingExtractions: s.pendingExtractions.filter((p: PendingExtraction) => p.id !== id),
+      }))
     } catch (e) {
       set({ error: `Reject failed: ${e}` })
     }
@@ -79,7 +86,11 @@ export const createExtractionSlice: StateCreator<AppStore, [], [], ExtractionSli
   batchApproveExtractions: async (ids: string[]) => {
     try {
       await api.batchApproveExtractions(ids)
-      set((s: { pendingExtractions: PendingExtraction[] }) => ({ pendingExtractions: s.pendingExtractions.filter((p: PendingExtraction) => !ids.includes(p.id)) }))
+      set((s: { pendingExtractions: PendingExtraction[] }) => ({
+        pendingExtractions: s.pendingExtractions.filter(
+          (p: PendingExtraction) => !ids.includes(p.id),
+        ),
+      }))
     } catch (e) {
       set({ error: `Batch approve failed: ${e}` })
     }

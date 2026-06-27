@@ -223,3 +223,35 @@ export interface NodeVersion {
   word_count: number
   created_at: string | null
 }
+
+export interface GraphQueryRequest {
+  vault_id: string
+  question: string
+}
+
+export interface CypherResultRow {
+  values: [string, string][]
+}
+
+export interface GraphQueryResponse {
+  answer: string
+  cypher: string
+  results: CypherResultRow[]
+}
+
+export interface AcquireRequest {
+  doi?: string | null
+  title?: string | null
+  authors?: string[]
+  year?: number | null
+  isbn?: string | null
+  url?: string | null
+  keywords?: string[]
+}
+
+export interface AcquireResponse {
+  id: number
+  status: string
+  doi: string | null
+  title: string | null
+}

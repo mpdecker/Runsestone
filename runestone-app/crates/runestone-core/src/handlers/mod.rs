@@ -11,3 +11,4 @@ pub mod tag;
 pub mod templates;
 pub mod vault;
 pub mod versions;
+pub mod graph_query;

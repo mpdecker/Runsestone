@@ -15,7 +15,13 @@ vi.mock('@/features/layout/MobileSettingsView', () => ({
   MobileSettingsView: () => <div data-testid="mobile-settings">Settings</div>,
 }))
 vi.mock('@/features/layout/MobileTabBar', () => ({
-  MobileTabBar: ({ activeTab, onTabChange }: { activeTab: string; onTabChange: (tab: string) => void }) => (
+  MobileTabBar: ({
+    activeTab,
+    onTabChange,
+  }: {
+    activeTab: string
+    onTabChange: (tab: string) => void
+  }) => (
     <div data-testid="mobile-tab-bar">
       <button onClick={() => onTabChange('graph')}>Graph Tab</button>
       <button onClick={() => onTabChange('notes')}>Notes Tab</button>

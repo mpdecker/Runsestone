@@ -5,9 +5,14 @@ import type { ChatMessage, Citation } from '@/lib/types'
 
 export function ChatPanel() {
   const {
-    selectedVaultId, showChat, toggleChat,
-    chatMessages, chatLoading, sendChatMessage,
-    chatCitations, selectNode,
+    selectedVaultId,
+    showChat,
+    toggleChat,
+    chatMessages,
+    chatLoading,
+    sendChatMessage,
+    chatCitations,
+    selectNode,
   } = useStore(
     useShallow((s) => ({
       selectedVaultId: s.selectedVaultId,
@@ -36,24 +41,34 @@ export function ChatPanel() {
     <div className="w-80 border-l bg-card flex flex-col shrink-0 h-full">
       <div className="p-3 border-b flex items-center justify-between">
         <h2 className="font-semibold text-sm">Chat with Graph</h2>
-        <button className="text-xs text-muted-foreground hover:text-foreground" onClick={toggleChat}>×</button>
+        <button
+          className="text-xs text-muted-foreground hover:text-foreground"
+          onClick={toggleChat}
+        >
+          ×
+        </button>
       </div>
 
       <div className="flex-1 overflow-y-auto p-3 space-y-3">
         {chatMessages.map((msg: ChatMessage, i: number) => (
           <div key={i} className={`text-sm ${msg.role === 'user' ? 'text-right' : ''}`}>
-            <div className={`inline-block px-3 py-1.5 rounded-lg max-w-[90%] whitespace-pre-wrap ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+            <div
+              className={`inline-block px-3 py-1.5 rounded-lg max-w-[90%] whitespace-pre-wrap ${msg.role === 'user' ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}
+            >
               {msg.content}
-              {msg.role === 'assistant' && chatLoading && i === chatMessages.length - 1 && !msg.content && (
-                <span className="italic text-muted-foreground">Thinking...</span>
-              )}
+              {msg.role === 'assistant' &&
+                chatLoading &&
+                i === chatMessages.length - 1 &&
+                !msg.content && <span className="italic text-muted-foreground">Thinking...</span>}
             </div>
           </div>
         ))}
 
         {chatCitations.length > 0 && (
           <div className="border-t pt-2 mt-2">
-            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Sources</p>
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">
+              Sources
+            </p>
             {chatCitations.map((c: Citation, i: number) => (
               <button
                 key={i}
@@ -66,7 +81,6 @@ export function ChatPanel() {
             ))}
           </div>
         )}
-
       </div>
 
       <div className="p-3 border-t flex gap-2">

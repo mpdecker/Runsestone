@@ -161,8 +161,10 @@ pub async fn chat_with_graph(
         let mut stream = ctx
             .neo4j
             .execute(
-                neo4rs::query("MATCH (n:Node {pg_id: $pg_id})-[r]-(m:Node) RETURN m.title, type(r)")
-                    .param("pg_id", top.node_id.to_string()),
+                neo4rs::query(
+                    "MATCH (n:Node {pg_id: $pg_id})-[r]-(m:Node) RETURN m.title, type(r)",
+                )
+                .param("pg_id", top.node_id.to_string()),
             )
             .await
             .map_err(|e| format!("Neo4j failed: {}", e))?;
@@ -261,8 +263,10 @@ async fn gather_chat_context(
         let mut stream = ctx
             .neo4j
             .execute(
-                neo4rs::query("MATCH (n:Node {pg_id: $pg_id})-[r]-(m:Node) RETURN m.title, type(r)")
-                    .param("pg_id", top.node_id.to_string()),
+                neo4rs::query(
+                    "MATCH (n:Node {pg_id: $pg_id})-[r]-(m:Node) RETURN m.title, type(r)",
+                )
+                .param("pg_id", top.node_id.to_string()),
             )
             .await
             .map_err(|e| format!("Neo4j failed: {}", e))?;
@@ -297,9 +301,7 @@ where
     let prompt = build_chat_prompt(&request, &context);
 
     let answer = match ctx.llm_config.provider.as_str() {
-        "ollama" => {
-            stream_ollama_chat(&prompt, &ctx.llm_config, &mut on_chunk).await?
-        }
+        "ollama" => stream_ollama_chat(&prompt, &ctx.llm_config, &mut on_chunk).await?,
         _ => {
             let answer = simple_chat(&prompt, &ctx.llm_config).await?;
             on_chunk(&answer);
@@ -334,7 +336,10 @@ where
         .map_err(|e| format!("Ollama stream failed: {}", e))?;
 
     let mut full = String::new();
-    let text = response.text().await.map_err(|e| format!("Read stream: {}", e))?;
+    let text = response
+        .text()
+        .await
+        .map_err(|e| format!("Read stream: {}", e))?;
 
     for line in text.lines() {
         if line.is_empty() {

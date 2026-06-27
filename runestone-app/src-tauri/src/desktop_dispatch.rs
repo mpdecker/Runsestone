@@ -29,8 +29,8 @@ pub async fn dispatch_desktop_only(
         }
         "scan_vault" => {
             let vault_id: Uuid = parse_field(&args, "vault_id")?;
-            let delete_orphans: bool = parse_optional_field(&args, "delete_orphans")?
-                .unwrap_or(false);
+            let delete_orphans: bool =
+                parse_optional_field(&args, "delete_orphans")?.unwrap_or(false);
             let result = node::scan_vault_impl(state, vault_id, delete_orphans).await?;
             Ok(serde_json::to_value(result).map_err(|e| e.to_string())?)
         }
@@ -40,18 +40,22 @@ pub async fn dispatch_desktop_only(
             let result = document::import_document_impl(state, vault_id, file_path).await?;
             Ok(serde_json::to_value(result).map_err(|e| e.to_string())?)
         }
+        "acquire_document" => {
+            let vault_id: Uuid = parse_field(&args, "vault_id")?;
+            let request: document::AcquireDocumentRequest = parse_field(&args, "request")?;
+            let result = document::acquire_document_impl(state, vault_id, request).await?;
+            Ok(serde_json::to_value(result).map_err(|e| e.to_string())?)
+        }
         "import_obsidian_vault" => {
             let vault_id: Uuid = parse_field(&args, "vault_id")?;
             let root_path: String = parse_field(&args, "root_path")?;
-            let result =
-                obsidian::import_obsidian_vault_impl(state, vault_id, root_path).await?;
+            let result = obsidian::import_obsidian_vault_impl(state, vault_id, root_path).await?;
             Ok(serde_json::to_value(result).map_err(|e| e.to_string())?)
         }
         "export_node_to_markdown" => {
             let node_id: Uuid = parse_field(&args, "node_id")?;
             let export_path: Option<String> = parse_optional_field(&args, "export_path")?;
-            let result =
-                export::export_node_to_markdown_impl(state, node_id, export_path).await?;
+            let result = export::export_node_to_markdown_impl(state, node_id, export_path).await?;
             Ok(Value::String(result))
         }
         "export_vault_to_markdown" => {
@@ -68,19 +72,11 @@ pub async fn dispatch_desktop_only(
         "read_plugin_file" => {
             let plugin_root: String = parse_field(&args, "plugin_root")?;
             let relative_path: String = parse_field(&args, "relative_path")?;
-            let result =
-                plugins::read_plugin_file_impl(plugin_root, relative_path).await?;
+            let result = plugins::read_plugin_file_impl(plugin_root, relative_path).await?;
             Ok(Value::String(result))
         }
         other => Err(format!("Unknown desktop-only command: {}", other)),
     }
-}
-
-fn parse_uuid(args: &Value) -> Result<Uuid, String> {
-    if let Some(s) = args.as_str() {
-        return Uuid::parse_str(s).map_err(|e| e.to_string());
-    }
-    serde_json::from_value(args.clone()).map_err(|e| e.to_string())
 }
 
 fn parse_field<T: serde::de::DeserializeOwned>(args: &Value, field: &str) -> Result<T, String> {

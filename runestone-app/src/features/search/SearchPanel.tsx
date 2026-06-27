@@ -6,9 +6,17 @@ import { ResultCard } from './ResultCard'
 
 export function SearchPanel() {
   const {
-    showSearch, toggleSearch, searchQuery, setSearchQuery,
-    runSearch, searchResults, searchLoading, similarNodes,
-    selectNode, findSimilar, selectedNodeId,
+    showSearch,
+    toggleSearch,
+    searchQuery,
+    setSearchQuery,
+    runSearch,
+    searchResults,
+    searchLoading,
+    similarNodes,
+    selectNode,
+    findSimilar,
+    selectedNodeId,
   } = useStore(
     useShallow((s) => ({
       showSearch: s.showSearch,
@@ -106,9 +114,7 @@ export function SearchPanel() {
       </div>
 
       <div className="flex-1 overflow-y-auto">
-        {searchLoading && (
-          <p className="text-xs text-muted-foreground p-3">Searching...</p>
-        )}
+        {searchLoading && <p className="text-xs text-muted-foreground p-3">Searching...</p>}
 
         {similarNodes.length > 0 && searchResults === null && (
           <div>

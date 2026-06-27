@@ -28,9 +28,7 @@ export function MobileTabBar({ activeTab, onTabChange }: MobileTabBarProps) {
           key={key}
           onClick={() => onTabChange(key)}
           className={`flex flex-col items-center justify-center gap-0.5 flex-1 h-full min-h-[44px] min-w-[44px] ${
-            activeTab === key
-              ? 'text-primary'
-              : 'text-muted-foreground'
+            activeTab === key ? 'text-primary' : 'text-muted-foreground'
           }`}
         >
           {icon}

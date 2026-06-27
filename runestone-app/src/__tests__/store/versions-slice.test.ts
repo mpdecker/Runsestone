@@ -2,9 +2,22 @@ import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { useStore } from '@/store'
 
 const mockApi = vi.hoisted(() => ({
-  getNodeVersions: vi.fn().mockResolvedValue([{ id: 'ver-1', node_id: 'n-1', title: 'Old', created_at: null }]),
+  getNodeVersions: vi
+    .fn()
+    .mockResolvedValue([{ id: 'ver-1', node_id: 'n-1', title: 'Old', created_at: null }]),
   restoreNodeVersion: vi.fn().mockResolvedValue(undefined),
-  getNode: vi.fn().mockResolvedValue({ id: 'n-1', vault_id: 'v-1', title: 'Restored', content: '<p>x</p>', content_type: 'note', file_path: null, metadata: {}, word_count: 1, created_at: null, updated_at: null }),
+  getNode: vi.fn().mockResolvedValue({
+    id: 'n-1',
+    vault_id: 'v-1',
+    title: 'Restored',
+    content: '<p>x</p>',
+    content_type: 'note',
+    file_path: null,
+    metadata: {},
+    word_count: 1,
+    created_at: null,
+    updated_at: null,
+  }),
   listNodes: vi.fn().mockResolvedValue([]),
 }))
 

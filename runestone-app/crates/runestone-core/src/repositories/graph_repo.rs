@@ -57,7 +57,8 @@ pub async fn fetch_graph_data(
             });
         }
     } else {
-        let node_query = "MATCH (n:Node {vault_id: $vault_id}) RETURN n.pg_id, n.title, n.content_type";
+        let node_query =
+            "MATCH (n:Node {vault_id: $vault_id}) RETURN n.pg_id, n.title, n.content_type";
         let mut node_stream = graph
             .execute(neo4rs::query(node_query).param("vault_id", vault_id_str.clone()))
             .await?;
@@ -91,8 +92,7 @@ pub async fn fetch_graph_data(
     if nodes.len() > DEFAULT_GRAPH_NODE_LIMIT {
         nodes.sort_by(|a, b| a.title.cmp(&b.title));
         nodes.truncate(DEFAULT_GRAPH_NODE_LIMIT);
-        let kept: std::collections::HashSet<String> =
-            nodes.iter().map(|n| n.id.clone()).collect();
+        let kept: std::collections::HashSet<String> = nodes.iter().map(|n| n.id.clone()).collect();
         edges.retain(|e| kept.contains(&e.source) && kept.contains(&e.target));
     }
 
