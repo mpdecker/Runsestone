@@ -6,7 +6,38 @@ use crate::path_guard::canonicalize_path;
 use crate::router::dispatch;
 use crate::services::graph_sync;
 use crate::state::AppState;
+use serde::{Deserialize, Serialize};
 use uuid::Uuid;
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct AcquireDocumentRequest {
+    pub doi: Option<String>,
+    pub title: Option<String>,
+    pub authors: Option<Vec<String>>,
+    pub year: Option<i32>,
+    pub isbn: Option<String>,
+    pub url: Option<String>,
+    pub keywords: Option<Vec<String>>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct AcquireResponse {
+    id: i32,
+    status: String,
+    doi: Option<String>,
+    title: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct JobResponse {
+    id: i32,
+    status: String,
+    file_path: Option<String>,
+    error: Option<String>,
+}
+
+const ACQUIRE_POLL_TIMEOUT_SECS: u64 = 600;
+const ACQUIRE_POLL_INTERVAL_SECS: u64 = 5;
 
 #[tauri::command]
 pub async fn import_document(
@@ -20,6 +51,120 @@ pub async fn import_document(
         serde_json::json!({ "vault_id": vault_id, "file_path": file_path }),
     )
     .await
+}
+
+#[tauri::command]
+pub async fn acquire_document(
+    state: tauri::State<'_, AppState>,
+    vault_id: Uuid,
+    request: AcquireDocumentRequest,
+) -> Result<Node, String> {
+    dispatch(
+        &state,
+        "acquire_document",
+        serde_json::json!({ "vault_id": vault_id, "request": request }),
+    )
+    .await
+}
+
+pub async fn acquire_document_impl(
+    state: &AppState,
+    vault_id: Uuid,
+    request: AcquireDocumentRequest,
+) -> Result<Node, String> {
+    if request.doi.is_none()
+        && request.title.is_none()
+        && request.isbn.is_none()
+        && request.url.is_none()
+    {
+        return Err("At least one of doi, title, isbn, or url is required".to_string());
+    }
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(30))
+        .build()
+        .map_err(|e| format!("HTTP client error: {}", e))?;
+
+    log::info!(
+        "Acquiring document via documentcrawler: doi={:?} title={:?}",
+        request.doi,
+        request.title,
+    );
+
+    let resp: AcquireResponse = client
+        .post("http://localhost:8099/acquire")
+        .json(&request)
+        .send()
+        .await
+        .map_err(|e| {
+            format!(
+                "documentcrawler unavailable at localhost:8099: {}. Is `documentcrawler serve` running?",
+                e
+            )
+        })?
+        .json()
+        .await
+        .map_err(|e| format!("Invalid response from documentcrawler: {}", e))?;
+
+    let job_id = resp.id;
+    let max_polls = ACQUIRE_POLL_TIMEOUT_SECS / ACQUIRE_POLL_INTERVAL_SECS;
+
+    for poll in 0..max_polls {
+        tokio::time::sleep(std::time::Duration::from_secs(ACQUIRE_POLL_INTERVAL_SECS)).await;
+
+        match client
+            .get(format!("http://localhost:8099/jobs/{}", job_id))
+            .send()
+            .await
+        {
+            Ok(r) => {
+                let job: JobResponse = r
+                    .json()
+                    .await
+                    .map_err(|e| format!("Invalid job response: {}", e))?;
+                match job.status.as_str() {
+                    "done" => {
+                        let file_path = job
+                            .file_path
+                            .ok_or("documentcrawler job completed but returned no file_path")?;
+                        log::info!(
+                            "Document acquired, importing: job_id={} file_path={}",
+                            job_id,
+                            file_path,
+                        );
+                        return import_document_impl(state, vault_id, file_path).await;
+                    }
+                    "failed" => {
+                        return Err(format!(
+                            "Document acquisition failed: {}",
+                            job.error.unwrap_or_default()
+                        ));
+                    }
+                    _ => {
+                        log::debug!(
+                            "Waiting for document download: job_id={} status={} poll={}",
+                            job_id,
+                            job.status,
+                            poll,
+                        );
+                    }
+                }
+            }
+            Err(e) => {
+                log::warn!(
+                    "Poll request failed, retrying: job_id={} poll={} error={}",
+                    job_id,
+                    poll,
+                    e,
+                );
+            }
+        }
+    }
+
+    Err(format!(
+        "Timed out after {} seconds waiting for document download (job {})",
+        ACQUIRE_POLL_TIMEOUT_SECS, job_id
+    ))
 }
 
 pub async fn import_document_impl(

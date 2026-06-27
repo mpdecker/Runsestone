@@ -8,9 +8,8 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 pub fn content_hash(content: &str) -> String {
-    let mut hasher = Sha256::new();
-    hasher.update(content.as_bytes());
-    format!("{:x}", hasher.finalize())
+    let hash = Sha256::digest(content.as_bytes());
+    hash.iter().map(|b| format!("{:02x}", b)).collect()
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

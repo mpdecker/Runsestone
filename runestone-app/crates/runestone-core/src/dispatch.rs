@@ -1,11 +1,11 @@
 use crate::context::BackendContext;
 use crate::error::AppError;
 use crate::handlers::{
-    ai, composer, document, embeddings, extraction, graph, node, properties, search, tag,
-    templates, vault, versions,
+    ai, composer, document, embeddings, extraction, graph, graph_query, node, properties, search,
+    tag, templates, vault, versions,
 };
 use crate::models::chat::ChatRequest;
-use crate::models::graph::GraphOptions;
+use crate::models::graph::{GraphOptions, GraphQueryRequest};
 use crate::models::node::{CreateNodeRequest, ListNodesRequest, UpdateNodeRequest};
 use crate::models::properties::SetPropertyRequest;
 use crate::models::search::SearchQuery;
@@ -20,6 +20,7 @@ pub const DESKTOP_ONLY_COMMANDS: &[&str] = &[
     "get_clipper_auth_token",
     "scan_vault",
     "import_document",
+    "acquire_document",
     "import_obsidian_vault",
     "export_node_to_markdown",
     "export_vault_to_markdown",
@@ -307,6 +308,17 @@ pub async fn dispatch_local(
             let node_id: Uuid = parse_field(&args, "node_id")?;
             let new_title: String = parse_field(&args, "new_title")?;
             let result = composer::split_node(ctx, node_id, new_title).await?;
+            serde_json::to_value(result).map_err(|e| e.to_string())
+        }
+        "run_cypher" => {
+            let cypher: String = serde_json::from_value(args).map_err(|e| e.to_string())?;
+            let result = graph_query::run_cypher(ctx, cypher).await?;
+            serde_json::to_value(result).map_err(|e| e.to_string())
+        }
+        "graph_query" => {
+            let request: GraphQueryRequest =
+                serde_json::from_value(args).map_err(|e| e.to_string())?;
+            let result = graph_query::graph_query(ctx, request).await?;
             serde_json::to_value(result).map_err(|e| e.to_string())
         }
         other => Err(format!("Unknown command: {}", other)),

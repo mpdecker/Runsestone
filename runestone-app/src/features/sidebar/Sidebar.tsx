@@ -15,6 +15,8 @@ import { CssSnippets } from './CssSnippets'
 import { ClipperPanel } from './ClipperPanel'
 import { PluginPanel } from './PluginPanel'
 import { FileTree } from './FileTree'
+import { GraphQueryPanel } from './GraphQueryPanel'
+import { ExportPanel } from './ExportPanel'
 import { PanelRightOpen, PanelRightClose } from 'lucide-react'
 
 export function Sidebar() {
@@ -37,42 +39,50 @@ export function Sidebar() {
     toggleExtractions,
     showExtractions,
     pendingExtractions,
-    toggleChat,
-    showChat,
-    sidebarCollapsed,
-    toggleSidebar,
-    listViewMode,
-    setListViewMode,
-    registeredPanels,
-  } = useStore(
-    useShallow((s) => ({
-      selectedVaultId: s.selectedVaultId,
-      scanVault: s.scanVault,
-      createNode: s.createNode,
-      isLoading: s.isLoading,
-      error: s.error,
-      nodeError: s.nodeError,
-      nodeLoading: s.nodeLoading,
-      graphError: s.graphError,
-      graphLoading: s.graphLoading,
-      searchError: s.searchError,
-      searchLoading: s.searchLoading,
-      clipperError: s.clipperError,
-      toggleSearch: s.toggleSearch,
-      showSearch: s.showSearch,
-      selectNode: s.selectNode,
-      toggleExtractions: s.toggleExtractions,
-      showExtractions: s.showExtractions,
-      pendingExtractions: s.pendingExtractions,
-      toggleChat: s.toggleChat,
-      showChat: s.showChat,
-      sidebarCollapsed: s.sidebarCollapsed,
-      toggleSidebar: s.toggleSidebar,
-      listViewMode: s.listViewMode,
-      setListViewMode: s.setListViewMode,
-      registeredPanels: s.registeredPanels,
-    })),
-  )
+      toggleChat,
+      showChat,
+      sidebarCollapsed,
+      toggleSidebar,
+      listViewMode,
+      setListViewMode,
+      registeredPanels,
+      toggleGraphQuery,
+      showGraphQuery,
+      toggleExport,
+      showExport,
+    } = useStore(
+      useShallow((s) => ({
+        selectedVaultId: s.selectedVaultId,
+        scanVault: s.scanVault,
+        createNode: s.createNode,
+        isLoading: s.isLoading,
+        error: s.error,
+        nodeError: s.nodeError,
+        nodeLoading: s.nodeLoading,
+        graphError: s.graphError,
+        graphLoading: s.graphLoading,
+        searchError: s.searchError,
+        searchLoading: s.searchLoading,
+        clipperError: s.clipperError,
+        toggleSearch: s.toggleSearch,
+        showSearch: s.showSearch,
+        selectNode: s.selectNode,
+        toggleExtractions: s.toggleExtractions,
+        showExtractions: s.showExtractions,
+        pendingExtractions: s.pendingExtractions,
+        toggleChat: s.toggleChat,
+        showChat: s.showChat,
+        sidebarCollapsed: s.sidebarCollapsed,
+        toggleSidebar: s.toggleSidebar,
+        listViewMode: s.listViewMode,
+        setListViewMode: s.setListViewMode,
+        registeredPanels: s.registeredPanels,
+        toggleGraphQuery: s.toggleGraphQuery,
+        showGraphQuery: s.showGraphQuery,
+        toggleExport: (s as unknown as { toggleExport: () => void }).toggleExport,
+        showExport: (s as unknown as { showExport: boolean }).showExport,
+      })),
+    )
 
   const [showObsidianImport, setShowObsidianImport] = useState(false)
   const [showNewNode, setShowNewNode] = useState(false)
@@ -171,6 +181,26 @@ export function Sidebar() {
                   aria-label="Chat"
                 >
                   <span className="text-[10px]">C</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-6 w-6 ${showGraphQuery ? 'bg-accent' : ''}`}
+                  onClick={toggleGraphQuery}
+                  title="Graph Query"
+                  aria-label="Graph Query"
+                >
+                  <span className="text-[10px]">G</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-6 w-6 ${showExport ? 'bg-accent' : ''}`}
+                  onClick={toggleExport}
+                  title="Export"
+                  aria-label="Export"
+                >
+                  <span className="text-[10px]">D</span>
                 </Button>
                 <Button
                   variant="ghost"
@@ -302,6 +332,10 @@ export function Sidebar() {
             <ClipperPanel />
 
             <PluginPanel />
+
+            <GraphQueryPanel />
+
+            <ExportPanel />
 
             {registeredPanels?.map((panel) => (
               <div

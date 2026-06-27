@@ -1,4 +1,14 @@
-FROM rust:1.85-bookworm AS builder
+FROM node:22-bookworm AS frontend-builder
+
+WORKDIR /app
+
+COPY package.json pnpm-lock.yaml ./
+RUN corepack enable && pnpm install --frozen-lockfile
+
+COPY . .
+RUN pnpm build
+
+FROM rust:1.85-bookworm AS backend-builder
 
 WORKDIR /app
 
@@ -28,9 +38,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-COPY --from=builder /app/target/release/runestone-server /usr/local/bin/runestone-server
+COPY --from=backend-builder /app/target/release/runestone-server /usr/local/bin/runestone-server
+COPY --from=frontend-builder /app/dist /app/static
 
 ENV RUNESTONE_SERVER_PORT=3000
+ENV STATIC_DIR=/app/static
 
 EXPOSE 3000
 

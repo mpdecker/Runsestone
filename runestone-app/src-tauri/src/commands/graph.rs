@@ -2,6 +2,7 @@ use crate::models::graph::WikiLinkRow;
 use crate::models::graph::{Backlink, GraphData, GraphOptions};
 use crate::router::dispatch;
 use crate::state::AppState;
+use runestone_core::models::graph::{CypherResultRow, GraphQueryRequest, GraphQueryResponse};
 use uuid::Uuid;
 
 #[tauri::command]
@@ -67,6 +68,32 @@ pub async fn get_outgoing_links(
         &state,
         "get_outgoing_links",
         serde_json::to_value(node_id).map_err(|e| e.to_string())?,
+    )
+    .await
+}
+
+#[tauri::command]
+pub async fn run_cypher(
+    state: tauri::State<'_, AppState>,
+    cypher: String,
+) -> Result<Vec<CypherResultRow>, String> {
+    dispatch(
+        &state,
+        "run_cypher",
+        serde_json::to_value(cypher).map_err(|e| e.to_string())?,
+    )
+    .await
+}
+
+#[tauri::command]
+pub async fn graph_query(
+    state: tauri::State<'_, AppState>,
+    request: GraphQueryRequest,
+) -> Result<GraphQueryResponse, String> {
+    dispatch(
+        &state,
+        "graph_query",
+        serde_json::to_value(request).map_err(|e| e.to_string())?,
     )
     .await
 }

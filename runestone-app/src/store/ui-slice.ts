@@ -11,10 +11,12 @@ export interface UISlice {
   readingMode: boolean
   splitMode: 'off' | 'vertical'
   userCss: string
+  showExport: boolean
   toggleDarkMode: () => void
   toggleCommandPalette: () => void
   toggleChat: () => void
   toggleSidebar: () => void
+  toggleExport: () => void
   setFilterText: (text: string) => void
   toggleFilterType: (type: string) => void
   setListViewMode: (mode: 'list' | 'tree') => void
@@ -33,6 +35,7 @@ export const createUISlice: StateCreator<AppStore, [], [], UISlice> = (set, get)
   readingMode: loadPersisted('readingMode', false),
   splitMode: 'off',
   userCss: loadPersisted('userCss', ''),
+  showExport: false,
 
   toggleDarkMode: () => {
     set((s: { darkMode: boolean }) => {
@@ -94,6 +97,10 @@ export const createUISlice: StateCreator<AppStore, [], [], UISlice> = (set, get)
   setUserCss: (css: string) => {
     persist('userCss', css)
     set({ userCss: css })
+  },
+
+  toggleExport: () => {
+    set((s: { showExport: boolean }) => ({ showExport: !s.showExport }))
   },
 })
 

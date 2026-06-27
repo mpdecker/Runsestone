@@ -1,5 +1,5 @@
 import type { StateCreator } from 'zustand'
-import type { GraphData, Backlink } from '../lib/types'
+import type { GraphData, Backlink, GraphQueryResponse } from '../lib/types'
 import type { AppStore } from './index'
 import * as api from '../lib/api'
 
@@ -15,6 +15,11 @@ export interface GraphSlice {
   outgoingLinks: Backlink[]
   showBacklinks: boolean
   showOutgoingLinks: boolean
+  graphQueryAnswer: string | null
+  graphQueryCypher: string | null
+  graphQueryResults: GraphQueryResponse['results'] | null
+  graphQueryLoading: boolean
+  showGraphQuery: boolean
   loadGraphData: (tag?: string) => Promise<void>
   loadLocalGraph: (nodeId: string, depth?: number) => Promise<void>
   setGraphViewMode: (mode: GraphViewMode) => void
@@ -24,6 +29,8 @@ export interface GraphSlice {
   loadOutgoingLinks: (nodeId: string) => Promise<void>
   toggleOutgoingLinks: () => void
   parseWikiLinks: (nodeId: string) => Promise<void>
+  sendGraphQuery: (question: string) => Promise<void>
+  toggleGraphQuery: () => void
 }
 
 export const createGraphSlice: StateCreator<AppStore, [], [], GraphSlice> = (set, get) => ({
@@ -36,6 +43,11 @@ export const createGraphSlice: StateCreator<AppStore, [], [], GraphSlice> = (set
   outgoingLinks: [],
   showBacklinks: false,
   showOutgoingLinks: false,
+  graphQueryAnswer: null,
+  graphQueryCypher: null,
+  graphQueryResults: null,
+  graphQueryLoading: false,
+  showGraphQuery: false,
 
   loadGraphData: async (tag?: string) => {
     const { selectedVaultId } = get()
@@ -112,5 +124,26 @@ export const createGraphSlice: StateCreator<AppStore, [], [], GraphSlice> = (set
     } catch (e) {
       set({ graphError: `Failed to parse wiki links: ${e}` })
     }
+  },
+
+  sendGraphQuery: async (question: string) => {
+    const { selectedVaultId } = get()
+    if (!selectedVaultId) return
+    set({ graphQueryLoading: true, graphQueryAnswer: null, graphQueryCypher: null, graphQueryResults: null, graphError: null })
+    try {
+      const response = await api.graphQuery({ vault_id: selectedVaultId, question })
+      set({
+        graphQueryAnswer: response.answer,
+        graphQueryCypher: response.cypher,
+        graphQueryResults: response.results,
+        graphQueryLoading: false,
+      })
+    } catch (e) {
+      set({ graphError: `Graph query failed: ${e}`, graphQueryLoading: false })
+    }
+  },
+
+  toggleGraphQuery: () => {
+    set((s) => ({ showGraphQuery: !s.showGraphQuery }))
   },
 })

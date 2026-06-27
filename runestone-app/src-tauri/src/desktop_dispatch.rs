@@ -40,6 +40,12 @@ pub async fn dispatch_desktop_only(
             let result = document::import_document_impl(state, vault_id, file_path).await?;
             Ok(serde_json::to_value(result).map_err(|e| e.to_string())?)
         }
+        "acquire_document" => {
+            let vault_id: Uuid = parse_field(&args, "vault_id")?;
+            let request: document::AcquireDocumentRequest = parse_field(&args, "request")?;
+            let result = document::acquire_document_impl(state, vault_id, request).await?;
+            Ok(serde_json::to_value(result).map_err(|e| e.to_string())?)
+        }
         "import_obsidian_vault" => {
             let vault_id: Uuid = parse_field(&args, "vault_id")?;
             let root_path: String = parse_field(&args, "root_path")?;

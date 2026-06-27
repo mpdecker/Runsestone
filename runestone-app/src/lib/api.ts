@@ -28,6 +28,11 @@ import type {
   PropertiesResponse,
   SetPropertyRequest,
   NodeVersion,
+  GraphQueryRequest,
+  GraphQueryResponse,
+  CypherResultRow,
+  AcquireRequest,
+  AcquireResponse,
 } from './types'
 import type { PluginInfo } from './plugin-types'
 
@@ -307,4 +312,16 @@ export async function listTemplates(vaultId: string): Promise<NodeListItem[]> {
 
 export async function createNodeFromTemplate(templateId: string, title?: string): Promise<Node> {
   return invoke('create_node_from_template', { templateId, title })
+}
+
+export async function runCypher(cypher: string): Promise<CypherResultRow[]> {
+  return invoke('run_cypher', { cypher })
+}
+
+export async function graphQuery(request: GraphQueryRequest): Promise<GraphQueryResponse> {
+  return invoke('graph_query', { request })
+}
+
+export async function acquireDocument(request: AcquireRequest): Promise<AcquireResponse> {
+  return invoke('acquire_document', { request })
 }

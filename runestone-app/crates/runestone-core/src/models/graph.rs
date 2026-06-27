@@ -44,3 +44,21 @@ pub struct GraphOptions {
     pub depth: Option<u32>,
     pub tag: Option<String>,
 }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GraphQueryRequest {
+    pub vault_id: Uuid,
+    pub question: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GraphQueryResponse {
+    pub answer: String,
+    pub cypher: String,
+    pub results: Vec<CypherResultRow>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CypherResultRow {
+    pub values: Vec<(String, String)>,
+}
